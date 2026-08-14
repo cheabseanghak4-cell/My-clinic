@@ -598,19 +598,41 @@
   text-align: left;
   padding-bottom: 8px;
   margin-bottom: 12px;
-  border-bottom: 2px solid #1a1a1a;
+  border-bottom: none!important;
+  
 }
 .inv-print-header #invPrintLogo {
-  width: 200px;
+  width: 120px;
   height: auto;
-  margin: 0 0 8px;
+  margin-top: 8px;
+  margin-left: 5px;
   display: block;
+  /* margin-top: -66px; */
+  /* margin-left: -35px; */
 }
 .inv-print-header h1 {
-  font-size: 20px;
-  margin: 0 0 8px;
+  font-size: 15px;
+  margin: -px 8px;
   color: #1a1a1a;
   text-align: center;
+  margin-top: -100px;
+ display: block;  /* ឱ្យបន្ទាត់ខ្មៅរត់វែងល្មមតាមប្រវែងអក្សរ */
+ margin-bottom: 8px;
+ text-align: center;   /* រុញ inline-block elements មកចំកណ្តាល */
+}
+.inv-print-header h1 {
+  display: block !important; /* ឱ្យអត្ថបទបង្ហាញឡើងវិញ */
+  font-size: 15px;
+  color: #1a1a1a;
+  text-align: center;
+  
+  /* ដាក់បន្ទាត់ខ្មៅថ្មីដែលនៅចំកណ្តាលស្មើ */
+  border-bottom: 1px solid #000 !important; 
+  padding-bottom: 4px;
+  margin: 0 auto !important;
+
+
+  
 }
 
 /* លាក់ Elements មិនចាំបាច់ពេល Print */
