@@ -880,7 +880,7 @@
   margin-bottom:16px;
   border-bottom:2px solid #00897b;
 }
-.rx-print-title #rxClinicLogoImg{width:44px; height:44px; border-radius:10px; object-fit:cover; margin-bottom:6px;}
+.rx-print-title #rxClinicLogoImg{width:150px; height:150px; border-radius:10px; object-fit:contain; margin-bottom:10px;}
 .rx-print-title #rxClinicNameDisplay{font-size:22px; font-weight:700; color:#00897b;}
 .rx-print-title #rxClinicSubDisplay{font-size:12px; color:#555; margin-top:2px;}
 .rx-print-title h1{font-size:17px; margin:10px 0 2px; color:#333;}
@@ -889,7 +889,7 @@
   margin-top:95px;
   display:flex; flex-direction:column; align-items:flex-end;
 }
-.rx-sig-line{width:180px; border-top:1px solid #333; margin-bottom:6px;}
+.rx-sig-line{width:180px; border-top1px: solid #333; margin-bottom:6px;}
 .rx-print-signature div:last-child{font-size:11px; color:#666; text-align:center; width:180px; line-height:1.4;}
 
 @media print{
