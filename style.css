@@ -602,7 +602,7 @@
   
 }
 .inv-print-header #invPrintLogo {
-  width: 120px;
+  width: 180px;
   height: auto;
   margin-top: 8px;
   margin-left: 5px;
@@ -611,7 +611,7 @@
   /* margin-left: -35px; */
 }
 .inv-print-header h1 {
-  font-size: 15px;
+  font-size: 2px;
   margin: -px 8px;
   color: #1a1a1a;
   text-align: center;
@@ -689,7 +689,10 @@
   table.print-table td { font-weight: 600; }
   .inv-totals-table td { font-weight: 700; }
   .inv-totals-table td:first-child span { font-weight: 500; }
+
 }
+
+
   /* រចនាប័ទ្មសម្រាប់ផ្នែកវេជ្ជបញ្ជា */
 #prescriptionSection .presc-header-card {
   background: #ffc107;

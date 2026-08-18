@@ -136,6 +136,22 @@ function clearAllSilent(){
   document.getElementById('depositValue').value=0;
   document.getElementById('depositCurrency').value='usd';
   document.getElementById('invoiceNotes').value='';
+  // main.js
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // ដាក់កូដរបស់អ្នកទាំងអស់នៅទីនេះ...
+    
+    const printBtn = document.getElementById('printBtn'); // ឧទាហរណ៍ ID ប៊ូតុង Print
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
+
+    // កូដផ្សេងៗទៀត...
+
+});
   peekInvoiceNo().then(no=>{ document.getElementById('invoiceNo').value = no; });
   updatePendingLabel();
   renderRows();
@@ -294,7 +310,7 @@ document.getElementById('clinicName').addEventListener('input', saveSettings);
 document.getElementById('clinicSub').addEventListener('input', saveSettings);
 document.getElementById('clinicFacebook').addEventListener('input', saveSettings);
 document.getElementById('exRate').addEventListener('input', saveSettings);
-document.getElementById('discountValue').addEventListener('input', renderTotals);
+document.getElementById('discountValue')?.addEventListener('input', renderTotals);
 document.getElementById('discountType').addEventListener('change', renderTotals);
 document.getElementById('depositValue').addEventListener('input', renderTotals);
 document.getElementById('depositCurrency').addEventListener('change', renderTotals);
