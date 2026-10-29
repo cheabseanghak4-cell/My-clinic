@@ -681,6 +681,19 @@
     padding: 0; 
     width: auto;
   }
+  .inv-inline-inputs input[type="number"],
+  .inv-inline-input-solo[type="number"] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  }
+  .inv-inline-inputs input[type="number"]::-webkit-inner-spin-button,
+  .inv-inline-inputs input[type="number"]::-webkit-outer-spin-button,
+  .inv-inline-input-solo[type="number"]::-webkit-inner-spin-button,
+  .inv-inline-input-solo[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    margin: 0 !important;
+  }
 
   .print-table { display: table !important; }
   table.items input { border: none; background: transparent; -webkit-appearance: none; appearance: none; padding-left: 0; }
