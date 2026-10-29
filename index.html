@@ -28,17 +28,32 @@
           </div>
         </div>
         <div class="app-tabs" id="appTabs">
-          <button class="tab-btn active" data-view="invoice" onclick="switchView('invoice')">
-            <span class="tab-icon">🧾</span><span class="tab-label">វិក្កយបត្រ</span>
+          <button class="tab-btn active" data-view="dashboard" onclick="switchView('dashboard')">
+            <span class="tab-label">Dashboard</span><span class="tab-sub">សង្ខេបស្ថិតិ និងសកម្មភាពប្រចាំថ្ងៃ</span>
+          </button>
+          <button class="tab-btn" data-view="patients" onclick="switchView('patients')">
+            <span class="tab-label">Patients</span><span class="tab-sub">បញ្ជីអ្នកជំងឺ និងព័ត៌មានផ្ទាល់ខ្លួន</span>
+          </button>
+          <button class="tab-btn" data-view="appointments" onclick="switchView('appointments')">
+            <span class="tab-label">Appointments</span><span class="tab-sub">កាលវិភាគណាត់ជួប</span>
+          </button>
+          <button class="tab-btn" data-view="treatments" onclick="switchView('treatments')">
+            <span class="tab-label">Treatments</span><span class="tab-sub">តារាងធ្មេញ និងការព្យាបាល</span>
+          </button>
+          <button class="tab-btn" data-view="invoice" onclick="switchView('invoice')">
+            <span class="tab-label">Invoices</span><span class="tab-sub">វិក្កយបត្រ និងការទូទាត់</span>
           </button>
           <button class="tab-btn" data-view="history" onclick="switchView('history')">
-            <span class="tab-icon">🕘</span><span class="tab-label">ប្រវត្តិ</span>
+            <span class="tab-label">History</span><span class="tab-sub">ប្រវត្តិវិក្កយបត្រ</span>
           </button>
-          <button class="tab-btn" data-view="settings" onclick="switchView('settings')">
-            <span class="tab-icon">⚙️</span><span class="tab-label">កំណត់</span>
+          <button class="tab-btn" data-view="reports" onclick="switchView('reports')">
+            <span class="tab-label">Reports</span><span class="tab-sub">របាយការណ៍អ្នកជំងឺ និងហិរញ្ញវត្ថុ</span>
           </button>
           <button class="tab-btn" data-view="prescription" onclick="switchView('prescription')">
-            <span class="tab-icon">💊</span><span class="tab-label">វេជ្ជបញ្ជា</span>
+            <span class="tab-label">Prescriptions</span><span class="tab-sub">វេជ្ជបញ្ជា និងប្រវត្តិថ្នាំ</span>
+          </button>
+          <button class="tab-btn" data-view="settings" onclick="switchView('settings')">
+            <span class="tab-label">Settings</span><span class="tab-sub">ព័ត៌មានគ្លីនិក និងការកំណត់</span>
           </button>
         </div>
         <button class="new-invoice-btn" onclick="newInvoice()">
@@ -48,10 +63,10 @@
       </div>
     </nav>
 
-    <main class="app-main">
+    <main class="app-main" id="appMain">
 
       <!-- ============ VIEW: INVOICE ============ -->
-      <section class="view active" id="view-invoice">
+      <section class="view" id="view-invoice">
         <div class="card" id="receiptCard">
 
           <div class="header">
@@ -111,6 +126,14 @@
             <div class="info-block" id="patientDetailsBlock">
               <div class="info-row">
                 <div class="info-field">
+                  <label>ជ្រើសរើសអ្នកជំងឺចាស់ / Existing Patient</label>
+                  <select id="invoicePatientSelect" onchange="selectPatientForInvoice(this.value)">
+                    <option value="">＋ បញ្ចូលអ្នកជំងឺថ្មី</option>
+                  </select>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-field">
                   <label>ត្រកូល / Surname</label>
                   <input id="surname" placeholder="ត្រកូល">
                 </div>
@@ -141,24 +164,58 @@
 
             <div class="chart-box">
               <div class="chart-title">តារាងធ្មេញ / Tooth Chart (FDI)</div>
-              <button class="arch-label" onclick="selectAllUpper()" style="cursor:pointer;">លើ · Upper</button>
-              <div class="quad-header">
-                <div class="quad-group"><button class="quad-label" onclick="selectRange(11,18)">UR</button></div>
-                <div class="quad-group"><button class="quad-label" onclick="selectRange(21,28)">UL</button></div>
+              <div class="dentition-picker" role="group" aria-labelledby="dentitionLabel">
+                <div class="dentition-picker-heading">
+                  <span class="dentition-picker-icon" aria-hidden="true">🦷</span>
+                  <span><strong id="dentitionLabel">ប្រភេទធ្មេញ</strong><small>ជ្រើសរើសតារាងធ្មេញអ្នកជំងឺ</small></span>
+                </div>
+                <div class="dentition-options">
+                  <button class="dentition-option active" id="adultDentitionBtn" type="button" aria-pressed="true" onclick="setDentition('adult')">
+                    <span class="dentition-option-icon" aria-hidden="true">🧑</span>
+                    <span><strong>មនុស្សពេញវ័យ</strong><small>Permanent teeth · 11–48</small></span>
+                    <span class="dentition-option-check" aria-hidden="true">✓</span>
+                  </button>
+                  <button class="dentition-option" id="childDentitionBtn" type="button" aria-pressed="false" onclick="setDentition('child')">
+                    <span class="dentition-option-icon" aria-hidden="true">🧒</span>
+                    <span><strong>កុមារ</strong><small>Primary teeth · 51–85</small></span>
+                    <span class="dentition-option-check" aria-hidden="true">✓</span>
+                  </button>
+                </div>
               </div>
-              <div class="arch-row" id="upperRow"></div>
-              <button class="arch-label" onclick="selectAllLower()" style="cursor:pointer;">ក្រោម · Lower</button>
-              <div class="quad-header">
-                <div class="quad-group"><button class="quad-label" onclick="selectRange(41,48)">LR</button></div>
-                <div class="quad-group"><button class="quad-label" onclick="selectRange(31,38)">LL</button></div>
+              <div id="adultToothChart">
+                <button class="arch-label" onclick="selectAllUpper()" style="cursor:pointer;">លើ · Upper</button>
+                <div class="quad-header">
+                  <div class="quad-group"><button class="quad-label" onclick="selectRange(11,18)">UR</button></div>
+                  <div class="quad-group"><button class="quad-label" onclick="selectRange(21,28)">UL</button></div>
+                </div>
+                <div class="arch-row" id="upperRow"></div>
+                <button class="arch-label" onclick="selectAllLower()" style="cursor:pointer;">ក្រោម · Lower</button>
+                <div class="quad-header">
+                  <div class="quad-group"><button class="quad-label" onclick="selectRange(41,48)">LR</button></div>
+                  <div class="quad-group"><button class="quad-label" onclick="selectRange(31,38)">LL</button></div>
+                </div>
+                <div class="arch-row" id="lowerRow"></div>
               </div>
-              <div class="arch-row" id="lowerRow"></div>
+              <div id="childToothChart" hidden>
+                <button class="arch-label" onclick="selectAllUpper()" style="cursor:pointer;">ធ្មេញលើ · Upper primary teeth</button>
+                <div class="quad-header">
+                  <div class="quad-group"><button class="quad-label" onclick="selectTeeth([55,54,53,52,51])">55–51 · UR</button></div>
+                  <div class="quad-group"><button class="quad-label" onclick="selectTeeth([61,62,63,64,65])">61–65 · UL</button></div>
+                </div>
+                <div class="arch-row" id="childUpperRow"></div>
+                <button class="arch-label" onclick="selectAllLower()" style="cursor:pointer;">ធ្មេញក្រោម · Lower primary teeth</button>
+                <div class="quad-header">
+                  <div class="quad-group"><button class="quad-label" onclick="selectTeeth([85,84,83,82,81])">85–81 · LR</button></div>
+                  <div class="quad-group"><button class="quad-label" onclick="selectTeeth([71,72,73,74,75])">71–75 · LL</button></div>
+                </div>
+                <div class="arch-row" id="childLowerRow"></div>
+              </div>
               <div class="legend">
                 <span><i class="dot green"></i> បានព្យាបាល (Treated)</span>
                 <span><i class="dot red"></i> មិនទាន់ព្យាបាល (Untreated)</span>
                 <button class="select-all-btn" onclick="selectAllTeeth()">Full Mouth</button>
               </div>
-              <div class="chart-hint">ចុចធ្មេញមួយ ឬច្រើន រួចបញ្ចូលសេវាកម្មខាងក្រោម</div>
+              <div class="chart-hint">ចុចធ្មេញមួយ ឬច្រើន រួចបញ្ចូលសេវាកម្មខាងក្រោម · FDI primary teeth: 51–55, 61–65, 71–75, 81–85</div>
             </div>
 
             <div class="service-box">
@@ -269,7 +326,7 @@
               </table>
             </div>
 
-            <div class="inv-rate-line" id="rateDisplayLine">1$ = 4,100 ៛</div>
+            <div class="inv-rate-line" id="rateDisplayLine">1$ = 4,000 ៛</div>
 
             <div class="inv-print-btn-row">
               <button class="print-btn" onclick="saveInvoiceAndPrint()" title="រក្សាទុក ហើយបោះពុម្ព">
@@ -289,6 +346,89 @@
             <button class="clear-link" onclick="clearAll()">សម្អាតទាំងអស់ / Clear</button>
           </div>
         </div>
+      </section>
+
+      <!-- ============ VIEW: DASHBOARD ============ -->
+      <section class="view active" id="view-dashboard">
+        <div class="dash-top">
+          <div>
+            <h2>Dashboard</h2>
+            <p>សង្ខេបស្ថិតិ និងសកម្មភាពប្រចាំថ្ងៃ</p>
+          </div>
+          <div class="dash-tools">
+            <label for="dashMonth" class="dash-lbl">ជ្រើសរើសខែ</label>
+            <select id="dashMonth" onchange="dashSelect(this.value)"></select>
+            <button class="btn btn-secondary" type="button" onclick="loadDashboard(true)">↻</button>
+          </div>
+        </div>
+        <div id="dashBody"></div>
+      </section>
+
+      <section class="view" id="view-patients">
+        <div class="card page-card">
+          <div class="page-head"><h2>Patient Management</h2><p>គ្រប់គ្រងអ្នកជំងឺ · Patient ID តែមួយសម្រាប់មនុស្សម្នាក់</p></div>
+          <div class="pt-body">
+            <div class="pt-total"><div><b id="ptTotal">0</b><span> Patient ID សរុប</span></div><button class="btn btn-secondary" type="button" onclick="loadPatientsView(true)">↻</button></div>
+            <div id="ptNotice"></div>
+            <div class="pt-add">
+              <input id="ptName" type="text" placeholder="ឈ្មោះអ្នកជំងឺ *">
+              <input id="ptPhone" type="tel" placeholder="លេខទូរស័ព្ទ">
+              <select id="ptGender"><option value="">ភេទ</option><option value="ប្រុស">ប្រុស</option><option value="ស្រី">ស្រី</option></select>
+              <input id="ptAge" type="number" min="0" placeholder="អាយុ">
+              <label class="pt-photo-field">រូបអ្នកជំងឺ (≤ 450 KB) <input id="ptPhoto" type="file" accept="image/*" onchange="previewPatientPhoto(this)"></label>
+              <img id="ptPhotoPreview" class="pt-photo-preview" alt="Patient photo preview" hidden>
+              <button class="btn btn-primary" type="button" onclick="addPatientManual()">＋ បន្ថែមអ្នកជំងឺថ្មី</button>
+            </div>
+            <input id="ptSearch" class="pt-search" type="search" placeholder="🔍 ស្វែងរកតាមឈ្មោះ លេខទូរស័ព្ទ ឬ Patient ID" oninput="renderPatients()">
+            <div id="ptList" class="history-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-appointments">
+        <div class="card page-card">
+          <div class="page-head"><h2>Appointments</h2><p>កាលវិភាគ និងប្រវត្តិណាត់ជួប តាម Patient ID</p></div>
+          <div class="pt-body">
+            <div class="appointment-form">
+              <label>អ្នកជំងឺ / Patient
+                <select id="appointmentPatient">
+                  <option value="">ជ្រើសរើសអ្នកជំងឺ</option>
+                </select>
+              </label>
+              <label>ថ្ងៃ និងម៉ោង / Date &amp; Time <input id="appointmentDate" type="datetime-local"><small id="appointmentHoursHint" class="settings-hint"></small></label>
+              <label>គ្រូពេទ្យ / Doctor <input id="appointmentDoctor" type="text" placeholder="ឈ្មោះគ្រូពេទ្យ"></label>
+              <label>សេវាកម្ម / Treatment <input id="appointmentTreatment" type="text" placeholder="ការព្យាបាល ឬសេវាកម្ម"></label>
+              <label>ស្ថានភាព / Status
+                <select id="appointmentStatus">
+                  <option value="scheduled">បានកំណត់</option>
+                  <option value="completed">បានមកព្យាបាល</option>
+                  <option value="cancelled">បានលុបចោល</option>
+                </select>
+              </label>
+              <label>ចំណាំ / Notes <input id="appointmentNotes" type="text" placeholder="ចំណាំបន្ថែម"></label>
+              <button class="btn btn-primary" type="button" onclick="saveAppointment()">＋ រក្សាទុកការណាត់ជួប</button>
+            </div>
+            <div id="appointmentNotice"></div>
+            <div id="appointmentList" class="history-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-reports">
+        <div class="dash-top">
+          <div><h2>Reports</h2><p>របាយការណ៍អ្នកជំងឺ និងហិរញ្ញវត្ថុ</p></div>
+          <div class="dash-tools">
+            <div class="rp-seg" id="rpMode">
+              <button type="button" data-m="day" onclick="rpSetMode('day')">ថ្ងៃ</button>
+              <button type="button" data-m="month" onclick="rpSetMode('month')">ខែ</button>
+              <button type="button" data-m="year" onclick="rpSetMode('year')">ឆ្នាំ</button>
+            </div>
+            <input type="date" id="rpDay" onchange="renderReports()">
+            <input type="month" id="rpMonth" onchange="renderReports()">
+            <select id="rpYear" onchange="renderReports()"></select>
+          </div>
+        </div>
+        <div id="rpBody"></div>
       </section>
 
       <!-- ============ VIEW: HISTORY ============ -->
@@ -323,7 +463,7 @@
         <div class="card page-card">
           <div class="page-head">
             <h2>ការកំណត់ / Settings</h2>
-            <p>គ្រប់គ្រងព័ត៌មានគ្លីនិក អត្រាប្តូរប្រាក់ និងសេវាកម្ម</p>
+            <p>គ្រប់គ្រងព័ត៌មានគ្លីនិក វិក្កយបត្រ ការណាត់ជួប និងទិន្នន័យ</p>
           </div>
           <div class="page-body">
 
@@ -378,12 +518,61 @@
             </div>
 
             <div class="settings-section">
-              <h3>សេវាកម្មដែលរក្សាទុក / Saved Services</h3>
-              <p class="settings-hint">សេវាកម្មទាំងនេះនឹងលេចឡើងជាជម្រើសរហ័សនៅពេលបង្កើតវិក្កយបត្រ</p>
+              <h3>វិក្កយបត្រ / Invoice</h3>
+              <p class="settings-hint">កំណត់បុព្វបទ និងលេខវិក្កយបត្របន្ទាប់។ លេខដែលមានរួចហើយមិនត្រូវបានប្ដូរទេ។</p>
+              <div class="settings-field">
+                <label for="invoicePrefix">បុព្វបទលេខ / Number Prefix</label>
+                <input id="invoicePrefix" maxlength="20" placeholder="ឧ. INV-">
+              </div>
+              <div class="settings-field">
+                <label for="nextInvoiceNumber">លេខវិក្កយបត្របន្ទាប់ / Next Number</label>
+                <input id="nextInvoiceNumber" type="number" min="1" step="1">
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3>ម៉ោងណាត់ជួប / Appointment Hours</h3>
+              <p class="settings-hint">ម៉ោងទាំងនេះប្រើសម្រាប់ពិនិត្យការណាត់ថ្មី។ រយៈពេលណាត់ត្រូវបញ្ចប់មុនម៉ោងបិទ។</p>
+              <div class="settings-field">
+                <label for="appointmentStartTime">ម៉ោងបើក / Opening Time</label>
+                <input id="appointmentStartTime" type="time">
+              </div>
+              <div class="settings-field">
+                <label for="appointmentEndTime">ម៉ោងបិទ / Closing Time</label>
+                <input id="appointmentEndTime" type="time">
+              </div>
+              <div class="settings-field">
+                <label for="appointmentDuration">រយៈពេលណាត់ / Appointment Duration</label>
+                <select id="appointmentDuration">
+                  <option value="15">15 នាទី</option>
+                  <option value="30">30 នាទី</option>
+                  <option value="45">45 នាទី</option>
+                  <option value="60">60 នាទី</option>
+                  <option value="90">90 នាទី</option>
+                  <option value="120">120 នាទី</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" type="button" onclick="saveOperationalSettings()">រក្សាទុកការកំណត់</button>
+            </div>
+
+            <div class="settings-section">
+              <h3>បម្រុងទុកទិន្នន័យ / Data Backup</h3>
+              <p class="settings-hint">ទាញយកអ្នកជំងឺ វិក្កយបត្រ ការណាត់ជួប និងការកំណត់ជាឯកសារ JSON។ Restore នឹងបញ្ចូលឯកសារតាម ID ដោយមិនលុបទិន្នន័យដែលមានស្រាប់។</p>
+              <div class="settings-backup-actions">
+                <button class="btn btn-secondary" type="button" onclick="exportClinicBackup()">⬇️ ទាញយក Backup</button>
+                <label class="btn btn-secondary settings-backup-file">⬆️ Restore Backup
+                  <input id="backupImportFile" type="file" accept=".json,application/json" onchange="importClinicBackup(this)">
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3>សេវាព្យាបាលដែលរក្សាទុក / Saved Treatments</h3>
+              <p class="settings-hint">សេវាទាំងនេះនឹងមានជាជម្រើសនៅពេលបញ្ចូលការព្យាបាលក្នុងវិក្កយបត្រ</p>
               <div class="service-row service-add-row">
                 <input id="newServiceName" placeholder="ឈ្មោះសេវាកម្ម / Service name">
-                <input id="newServicePrice" type="number" step="0.01" placeholder="តម្លៃ ($)" style="max-width:110px;">
-                <button class="add-service-btn" onclick="addPresetServiceDirect()">➕ បន្ថែម</button>
+                <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="តម្លៃ ($)" style="max-width:140px;">
+                <button class="add-service-btn" type="button" onclick="addPresetServiceDirect()">➕ បន្ថែម</button>
               </div>
               <div class="service-manage-list" id="serviceManageList"></div>
             </div>
