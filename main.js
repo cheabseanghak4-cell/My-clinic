@@ -116,7 +116,7 @@ function openModal(innerHtml, extraClass){
 
 /* ---------- nav / views ---------- */
 function switchView(name){
-  const viewName = name==='treatments' ? 'invoice' : name;
+  const viewName = name==='treatments' ? 'invoice' : name==='invoice' ? 'history' : name;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const target = document.getElementById('view-'+viewName);
   if(target) target.classList.add('active');
@@ -126,6 +126,7 @@ function switchView(name){
   if(name==='dashboard') loadDashboard();
   if(name==='patients') loadPatientsView();
   if(viewName==='invoice') loadInvoicePatientOptions();
+  if(viewName==='history') applyHistoryFilters();
   if(name==='appointments') loadAppointmentsView();
   if(name==='reports') loadReports();
 }
@@ -141,12 +142,15 @@ function clearAllSilent(){
   document.getElementById('gender').value='';
   document.getElementById('age').value='';
   document.getElementById('patientPhone').value='';
+  document.getElementById('invoicePatientSearch').value='';
   document.getElementById('invoicePatientSelect').value='';
+  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',[],syncInvoicePatientSearch);
   document.getElementById('doctorName').value=settings.doctorName || '';
   document.getElementById('cashierName').value=settings.cashierName || '';
   document.getElementById('discountValue').value=0;
   document.getElementById('depositValue').value=0;
   document.getElementById('depositCurrency').value='usd';
+  document.getElementById('paymentMethod').value='cash';
   document.getElementById('invoiceNotes').value='';
   // main.js
 
@@ -178,7 +182,7 @@ async function newInvoice(){
     if(!ok) return;
   }
   clearAllSilent();
-  switchView('invoice');
+  switchView('treatments');
   showToast('ត្រៀមរួចរាល់សម្រាប់វិក្កយបត្រថ្មី', 'success');
 }
 
@@ -511,7 +515,9 @@ function patientKey(){
 function handleManualPatientInput(){
   if(activePatientId){
     activePatientId = '';
+    document.getElementById('invoicePatientSearch').value = '';
     document.getElementById('invoicePatientSelect').value = '';
+    renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',[],syncInvoicePatientSearch);
   }
   loadToothChartForPatient();
 }
@@ -954,11 +960,16 @@ function renderTotals(){
   document.getElementById('balanceDueKhr').textContent = '≈ '+Math.round(balance*rate).toLocaleString('en-US')+' ៛';
   document.getElementById('totalPaidDisplay').textContent = '$'+deposit.toFixed(2);
 
-  // ប្រសិនបើមិនបញ្ចុះតម្លៃទេ (Discount = 0) មិនបាច់បង្ហាញ Grand Total / Paid / Due / Total Paid ទេ — បង្ហាញតែ Sub Total
-  const showExtra = discVal > 0;
-  ['grandTotalRow','paidRow','totalDueRow','totalPaidRow'].forEach(rowId=>{
+  // បង្ហាញតែ Sub Total នៅពេលមិនទាន់មានការបញ្ចុះតម្លៃ ឬការបង់ប្រាក់។
+  // វាល Paid និង Payment Method ត្រូវបង្ហាញជានិច្ច ដើម្បីអាចកត់ត្រាការបង់ប្រាក់បាន។
+  const showExtra = discVal > 0 || deposit > 0;
+  ['grandTotalRow','totalDueRow','totalPaidRow'].forEach(rowId=>{
     const el = document.getElementById(rowId);
     if(el) el.style.display = showExtra ? 'table-row' : 'none';
+  });
+  ['paidRow','paymentMethodRow'].forEach(rowId=>{
+    const el = document.getElementById(rowId);
+    if(el) el.style.display = 'table-row';
   });
   const totalsTableEl = document.getElementById('invTotalsTable');
   if(totalsTableEl) totalsTableEl.classList.toggle('inv-totals-boxed', showExtra);
@@ -1075,6 +1086,7 @@ async function saveInvoiceAndPrint() {
       discountType: document.getElementById('discountType').value,
       depositValue: document.getElementById('depositValue').value,
       depositCurrency: document.getElementById('depositCurrency').value,
+      paymentMethod: document.getElementById('paymentMethod').value,
       notes: document.getElementById('invoiceNotes').value,
       total: totalUsd,
       savedAt: new Date().toISOString()
@@ -1245,6 +1257,7 @@ async function openHistoryDetail(id){
           <div><label>អ្នកគិតលុយ</label><span>${esc(rec.cashierName||'—')}</span></div>
           <div><label>ភេទ / អាយុ</label><span>${esc(rec.gender||'—')} / ${esc(String(rec.age||'—'))}</span></div>
           <div><label>លេខទូរស័ព្ទ</label><span>${esc(rec.patientPhone||'—')}</span></div>
+          <div><label>វិធីបង់ប្រាក់</label><span>${rec.paymentMethod==='aba'?'ABA':'សាច់ប្រាក់ / Cash'}</span></div>
         </div>
         <table class="items detail-items">
           <thead><tr><th>Tooth#</th><th>Treatment</th><th class="num">Qty</th><th class="num">Subtotal</th></tr></thead>
@@ -1272,8 +1285,9 @@ async function loadInvoiceById(id){
     if(!rec) return;
     await loadClinicData();
     activePatientId = rec.patientId || '';
-    renderPatientSelectors();
-    if(activePatientId) selectPatientForInvoice(activePatientId);
+    document.getElementById('invoicePatientSearch').value='';
+    if(activePatientId) syncInvoicePatientSearch(activePatientId);
+    else renderPatientSelectors();
     document.getElementById('surname').value = rec.surname || '';
     document.getElementById('givenName').value = rec.givenName || '';
     document.getElementById('invoiceNo').value = rec.invoiceNo || '';
@@ -1287,6 +1301,7 @@ async function loadInvoiceById(id){
     document.getElementById('discountType').value = rec.discountType || 'percent';
     document.getElementById('depositValue').value = rec.depositValue || 0;
     document.getElementById('depositCurrency').value = rec.depositCurrency || 'usd';
+    document.getElementById('paymentMethod').value = rec.paymentMethod === 'aba' ? 'aba' : 'cash';
     document.getElementById('invoiceNotes').value = rec.notes || '';
     rows = rec.rows || [];
     pendingToothIndices = [];
@@ -1294,7 +1309,7 @@ async function loadInvoiceById(id){
     await loadToothChartForPatient();
     renderRows();
     updatePendingLabel();
-    switchView('invoice');
+    switchView('treatments');
     showToast('បានផ្ទុកវិក្កយបត្ររបស់ '+rec.fullName, 'success');
   }catch(e){ showToast('មិនអាចផ្ទុកវិក្កយបត្រនេះបានទេ', 'error'); }
 }
@@ -1679,19 +1694,90 @@ function renderPatientSelectors(){
   const invoiceSelect = document.getElementById('invoicePatientSelect');
   if(invoiceSelect){
     const selected = activePatientId;
-    invoiceSelect.innerHTML = '<option value="">＋ បញ្ចូលអ្នកជំងឺថ្មី</option>' + patients.map(p =>
-      '<option value="'+esc(p.id)+'">'+esc(p.id)+' · '+esc(p.name||'')+'</option>'
+    const search = document.getElementById('invoicePatientSearch');
+    const query = nameKey(search ? search.value : '');
+    const filteredPatients = patients.filter(p =>
+      !query || [p.name, p.id, p.phone].some(value => nameKey(String(value||'')).includes(query))
+    );
+    invoiceSelect.innerHTML = '<option value="">＋ បញ្ចូលអ្នកជំងឺថ្មី</option>' + filteredPatients.map(p =>
+      '<option value="'+esc(p.id)+'">'+esc(p.name||'')+' · '+esc(p.id)+'</option>'
     ).join('');
-    invoiceSelect.value = selected;
+    invoiceSelect.value = filteredPatients.some(p => p.id===selected) ? selected : '';
   }
   const appointmentSelect = document.getElementById('appointmentPatient');
   if(appointmentSelect){
     const selected = appointmentSelect.value;
     appointmentSelect.innerHTML = '<option value="">ជ្រើសរើសអ្នកជំងឺ</option>' + patients.map(p =>
-      '<option value="'+esc(p.id)+'">'+esc(p.id)+' · '+esc(p.name||'')+'</option>'
+      '<option value="'+esc(p.id)+'">'+esc(p.name||'')+' · '+esc(p.id)+'</option>'
     ).join('');
     appointmentSelect.value = selected;
   }
+}
+function renderPatientSearchResults(searchId, resultsId, patients, onSelect, showAll){
+  const search = document.getElementById(searchId);
+  const results = document.getElementById(resultsId);
+  if(!search || !results) return;
+  const query = showAll ? '' : nameKey(search.value);
+  results.replaceChildren();
+  if(!query && !showAll){
+    results.hidden = true;
+    return;
+  }
+  const matches = patients.filter(p =>
+    [p.name, p.id, p.phone].some(value => nameKey(String(value||'')).includes(query))
+  );
+  if(!matches.length){
+    const empty = document.createElement('div');
+    empty.className = 'patient-search-empty';
+    empty.textContent = 'រកមិនឃើញអ្នកជំងឺ';
+    results.appendChild(empty);
+  }else{
+    matches.forEach(patient => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'patient-search-option';
+      option.setAttribute('role','option');
+      option.textContent = (patient.name||'')+' · '+patient.id;
+      option.addEventListener('click', () => onSelect(patient.id));
+      results.appendChild(option);
+    });
+  }
+  results.hidden = false;
+}
+function showInvoicePatients(){
+  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',dbPatients,syncInvoicePatientSearch,true);
+}
+function showAppointmentPatients(){
+  renderPatientSearchResults('appointmentPatientSearch','appointmentPatientResults',dbPatients,selectAppointmentPatient,true);
+}
+function filterInvoicePatients(){
+  if(activePatientId) selectPatientForInvoice('');
+  renderPatientSelectors();
+  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',dbPatients,syncInvoicePatientSearch);
+}
+function syncInvoicePatientSearch(id){
+  selectPatientForInvoice(id);
+  const search = document.getElementById('invoicePatientSearch');
+  const patient = dbPatients.find(p => p.id===id);
+  if(search) search.value = patient ? patient.name||'' : '';
+  renderPatientSelectors();
+  const results = document.getElementById('invoicePatientResults');
+  if(results) results.hidden = true;
+}
+function filterAppointmentPatients(){
+  document.getElementById('appointmentPatient').value = '';
+  renderPatientSelectors();
+  renderPatientSearchResults('appointmentPatientSearch','appointmentPatientResults',dbPatients,selectAppointmentPatient);
+}
+function selectAppointmentPatient(id){
+  const patient = dbPatients.find(p => p.id===id);
+  const select = document.getElementById('appointmentPatient');
+  const search = document.getElementById('appointmentPatientSearch');
+  select.value = patient ? patient.id : '';
+  if(search) search.value = patient ? patient.name||'' : '';
+  renderPatientSelectors();
+  const results = document.getElementById('appointmentPatientResults');
+  if(results) results.hidden = true;
 }
 async function loadClinicData(force){
   if(clinicLoaded && !force && !clinicStale) return;
@@ -2094,6 +2180,10 @@ async function openAppointmentForPatient(id){
     closeModal();
     switchView('appointments');
     document.getElementById('appointmentPatient').value = id;
+    const patient = dbPatients.find(item => item.id===id);
+    document.getElementById('appointmentPatientSearch').value = patient ? patient.name||'' : '';
+    const results = document.getElementById('appointmentPatientResults');
+    if(results) results.hidden = true;
   }catch(e){
     console.error('Open patient appointment:',e);
     showToast('មិនអាចបើកទំព័រណាត់ជួបបានទេ', 'error');

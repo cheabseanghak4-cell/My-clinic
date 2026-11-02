@@ -663,6 +663,7 @@
   .inv-print-only { display: block !important; }
   .add-row, .del-btn, .clear-link, .chart-hint, .service-box, .chart-box, .quad-btns, .quad-header { display: none !important; }
   .section-label, #invDetailsBlock, #patientDetailsBlock { display: none !important; }
+  #paymentMethodRow { display: none !important; }
   .inv-print-btn-row { display: none !important; }
   .screen-table { display: none !important; }
 
@@ -1054,6 +1055,12 @@
   .pt-profile-photo{width:64px;height:64px;object-fit:cover;border-radius:50%;vertical-align:middle;margin-right:10px;}
   .pt-photo-update{position:relative;display:inline-flex;overflow:hidden;vertical-align:middle;}
   .pt-photo-update input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+  .patient-search{position:relative;width:100%;}
+  .patient-search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:30;max-height:240px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.14);}
+  .patient-search-results[hidden]{display:none;}
+  .patient-search-option{display:block;width:100%;padding:9px 12px;border:0;background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer;}
+  .patient-search-option:hover,.patient-search-option:focus{background:#e8f0fe;outline:none;}
+  .patient-search-empty{padding:10px 12px;color:var(--sub);font-size:13px;}
   .appointment-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px;padding:14px;background:var(--gray-box);border-radius:12px;}
   .appointment-form label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--sub);}
   .appointment-form input,.appointment-form select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;}

@@ -127,7 +127,11 @@
               <div class="info-row">
                 <div class="info-field">
                   <label>ជ្រើសរើសអ្នកជំងឺចាស់ / Existing Patient</label>
-                  <select id="invoicePatientSelect" onchange="selectPatientForInvoice(this.value)">
+                  <div class="patient-search">
+                    <input id="invoicePatientSearch" type="search" placeholder="🔍 ស្វែងរកតាមឈ្មោះ ឬ Patient ID" onfocus="showInvoicePatients()" oninput="filterInvoicePatients()">
+                    <div id="invoicePatientResults" class="patient-search-results" role="listbox" hidden></div>
+                  </div>
+                  <select id="invoicePatientSelect" style="display:none" onchange="syncInvoicePatientSearch(this.value)">
                     <option value="">＋ បញ្ចូលអ្នកជំងឺថ្មី</option>
                   </select>
                 </div>
@@ -311,6 +315,15 @@
                       </div>
                     </td>
                   </tr>
+                  <tr id="paymentMethodRow">
+                    <td>វិធីបង់ប្រាក់<br><span>Payment Method</span></td>
+                    <td class="num">
+                      <select id="paymentMethod">
+                        <option value="cash">សាច់ប្រាក់ / Cash</option>
+                        <option value="aba">ABA</option>
+                      </select>
+                    </td>
+                  </tr>
                   <tr id="totalDueRow" class="inv-due-row">
                     <td>ទឹកប្រាក់នៅសល់<br><span>Total Amount Due</span></td>
                     <td class="num">
@@ -391,7 +404,11 @@
           <div class="pt-body">
             <div class="appointment-form">
               <label>អ្នកជំងឺ / Patient
-                <select id="appointmentPatient">
+                <div class="patient-search">
+                  <input id="appointmentPatientSearch" type="search" placeholder="🔍 ស្វែងរកតាមឈ្មោះ ឬ Patient ID" onfocus="showAppointmentPatients()" oninput="filterAppointmentPatients()">
+                  <div id="appointmentPatientResults" class="patient-search-results" role="listbox" hidden></div>
+                </div>
+                <select id="appointmentPatient" style="display:none">
                   <option value="">ជ្រើសរើសអ្នកជំងឺ</option>
                 </select>
               </label>
