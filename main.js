@@ -537,6 +537,9 @@ function selectPatientForInvoice(id){
   document.getElementById('gender').value = patient.gender || '';
   document.getElementById('age').value = patient.age || '';
   document.getElementById('patientPhone').value = patient.phone || '';
+  const invoice = latestInvoiceForPatient(patient);
+  document.getElementById('doctorName').value = invoice && invoice.doctorName || settings.doctorName || '';
+  document.getElementById('cashierName').value = invoice && invoice.cashierName || settings.cashierName || '';
   loadToothChartForPatient();
 }
 async function loadToothChartForPatient(){
@@ -1689,6 +1692,17 @@ function matchPatient(name, phone){
   const nk = nameKey(name), ph = digitsOf(phone);
   return dbPatients.find(p => nameKey(p.name)===nk && (!ph || !digitsOf(p.phone) || digitsOf(p.phone)===ph)) || null;
 }
+function latestInvoiceForPatient(patient){
+  return dbInvoices.filter(invoice => {
+    if(invoice.patientId) return invoice.patientId===patient.id;
+    const name = invoice.fullName || [invoice.surname,invoice.givenName].filter(Boolean).join(' ');
+    return matchPatient(name,invoice.patientPhone)?.id===patient.id;
+  }).sort((a,b) => {
+    const dateA = Date.parse(a.date||'') || Date.parse(a.savedAt||'') || 0;
+    const dateB = Date.parse(b.date||'') || Date.parse(b.savedAt||'') || 0;
+    return dateB-dateA || (Date.parse(b.savedAt||'') || 0)-(Date.parse(a.savedAt||'') || 0);
+  })[0] || null;
+}
 function renderPatientSelectors(){
   const patients = dbPatients.slice().sort((a,b) => String(a.name||'').localeCompare(String(b.name||'')));
   const invoiceSelect = document.getElementById('invoicePatientSelect');
@@ -1707,11 +1721,49 @@ function renderPatientSelectors(){
   const appointmentSelect = document.getElementById('appointmentPatient');
   if(appointmentSelect){
     const selected = appointmentSelect.value;
-    appointmentSelect.innerHTML = '<option value="">ជ្រើសរើសអ្នកជំងឺ</option>' + patients.map(p =>
+    const doctor = document.getElementById('appointmentDoctor');
+    const appointmentPatients = patientsForDoctor(doctor ? doctor.value : '');
+    appointmentSelect.innerHTML = '<option value="">ជ្រើសរើសអ្នកជំងឺ</option>' + appointmentPatients.map(p =>
       '<option value="'+esc(p.id)+'">'+esc(p.name||'')+' · '+esc(p.id)+'</option>'
     ).join('');
     appointmentSelect.value = selected;
   }
+}
+function patientsForDoctor(doctorName){
+  const doctor = nameKey(doctorName);
+  if(!doctor) return dbPatients;
+  const patientIds = new Set();
+  dbInvoices.forEach(invoice => {
+    if(nameKey(invoice.doctorName)!==doctor) return;
+    const name = invoice.fullName || [invoice.surname,invoice.givenName].filter(Boolean).join(' ');
+    const patient = dbPatients.find(item => item.id===invoice.patientId) || matchPatient(name,invoice.patientPhone);
+    if(patient) patientIds.add(patient.id);
+  });
+  dbAppointments.forEach(appointment => {
+    if(nameKey(appointment.doctor)!==doctor) return;
+    const patient = dbPatients.find(item => item.id===appointment.patientId) || matchPatient(appointment.patientName,'');
+    if(patient) patientIds.add(patient.id);
+  });
+  const linkedPatients = dbPatients.filter(patient => patientIds.has(patient.id));
+  if(linkedPatients.length) return linkedPatients;
+  const knownDoctor = dbInvoices.some(invoice => nameKey(invoice.doctorName)===doctor) ||
+    dbAppointments.some(appointment => nameKey(appointment.doctor)===doctor);
+  return knownDoctor ? [] : dbPatients;
+}
+function renderDoctorOptions(){
+  const doctors = new Map();
+  dbInvoices.forEach(invoice => {
+    const name = String(invoice.doctorName||'').trim();
+    if(name && !doctors.has(nameKey(name))) doctors.set(nameKey(name),name);
+  });
+  dbAppointments.forEach(appointment => {
+    const name = String(appointment.doctor||'').trim();
+    if(name && !doctors.has(nameKey(name))) doctors.set(nameKey(name),name);
+  });
+  ['invoiceDoctorOptions','appointmentDoctorOptions'].forEach(id => {
+    const list = document.getElementById(id);
+    if(list) list.innerHTML = Array.from(doctors.values()).map(name => '<option value="'+esc(name)+'"></option>').join('');
+  });
 }
 function renderPatientSearchResults(searchId, resultsId, patients, onSelect, showAll){
   const search = document.getElementById(searchId);
@@ -1745,15 +1797,28 @@ function renderPatientSearchResults(searchId, resultsId, patients, onSelect, sho
   results.hidden = false;
 }
 function showInvoicePatients(){
-  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',dbPatients,syncInvoicePatientSearch,true);
+  const doctor = document.getElementById('doctorName');
+  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',patientsForDoctor(doctor ? doctor.value : ''),syncInvoicePatientSearch,true);
 }
 function showAppointmentPatients(){
-  renderPatientSearchResults('appointmentPatientSearch','appointmentPatientResults',dbPatients,selectAppointmentPatient,true);
+  const doctor = document.getElementById('appointmentDoctor');
+  renderPatientSearchResults('appointmentPatientSearch','appointmentPatientResults',patientsForDoctor(doctor ? doctor.value : ''),selectAppointmentPatient,true);
+}
+function filterInvoicePatientsByDoctor(){
+  renderPatientSelectors();
+  const doctor = document.getElementById('doctorName');
+  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',patientsForDoctor(doctor ? doctor.value : ''),syncInvoicePatientSearch,true);
+}
+function filterAppointmentPatientsByDoctor(){
+  renderPatientSelectors();
+  const doctor = document.getElementById('appointmentDoctor');
+  renderPatientSearchResults('appointmentPatientSearch','appointmentPatientResults',patientsForDoctor(doctor ? doctor.value : ''),selectAppointmentPatient,true);
 }
 function filterInvoicePatients(){
   if(activePatientId) selectPatientForInvoice('');
   renderPatientSelectors();
-  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',dbPatients,syncInvoicePatientSearch);
+  const doctor = document.getElementById('doctorName');
+  renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',patientsForDoctor(doctor ? doctor.value : ''),syncInvoicePatientSearch);
 }
 function syncInvoicePatientSearch(id){
   selectPatientForInvoice(id);
@@ -1767,7 +1832,8 @@ function syncInvoicePatientSearch(id){
 function filterAppointmentPatients(){
   document.getElementById('appointmentPatient').value = '';
   renderPatientSelectors();
-  renderPatientSearchResults('appointmentPatientSearch','appointmentPatientResults',dbPatients,selectAppointmentPatient);
+  const doctor = document.getElementById('appointmentDoctor');
+  renderPatientSearchResults('appointmentPatientSearch','appointmentPatientResults',patientsForDoctor(doctor ? doctor.value : ''),selectAppointmentPatient);
 }
 function selectAppointmentPatient(id){
   const patient = dbPatients.find(p => p.id===id);
@@ -1786,6 +1852,7 @@ async function loadClinicData(force){
   const res = await Promise.all([getDocs(collection(db,'patients')), getDocs(collection(db,'invoices'))]);
   dbPatients = res[0].docs.map(d => Object.assign({}, d.data(), {id:d.id}));
   dbInvoices = res[1].docs.map(d => Object.assign({}, d.data(), {_id:d.id}));
+  renderDoctorOptions();
   renderPatientSelectors();
   dashData = dbInvoices.map(dashFromRecord).filter(Boolean);
   dashData.forEach(x => { if(!x.pid){ const p = matchPatient(x.name, x.phone); if(p){ x.pid = p.id; x.key = p.id; } } });
@@ -1957,6 +2024,19 @@ function ptStats(){
   dashData.forEach(x => { const s = st[x.key] || (st[x.key] = {n:0, paid:0, total:0}); s.n++; s.paid += x.paid; s.total += x.total; });
   return st;
 }
+function patientTreatments(patient){
+  const treatments = new Set();
+  dbInvoices.forEach(invoice => {
+    const name = invoice.fullName || [invoice.surname,invoice.givenName].filter(Boolean).join(' ');
+    const linkedPatient = dbPatients.find(item => item.id===invoice.patientId) || matchPatient(name,invoice.patientPhone);
+    if(!linkedPatient || linkedPatient.id!==patient.id) return;
+    (invoice.rows||[]).forEach(row => {
+      const treatment = String(row.treatment||'').trim();
+      if(treatment) treatments.add(treatment);
+    });
+  });
+  return Array.from(treatments);
+}
 async function loadPatientsView(force){
   const list = document.getElementById('ptList');
   if(!clinicLoaded || force || clinicStale){
@@ -1972,12 +2052,14 @@ function renderPatients(){
   document.getElementById('ptTotal').textContent = new Set(dashData.map(x => x.key).concat(dbPatients.map(p => p.id))).size;
   const orphan = new Set(dashData.filter(x => !x.pid).map(x => x.key)).size;
   document.getElementById('ptNotice').innerHTML = orphan ? '<div class="pt-notice"><span>មានអ្នកជំងឺ '+orphan+' នាក់ក្នុងវិក្កយបត្រចាស់ ដែលមិនទាន់មាន Patient ID</span><button class="btn btn-primary" type="button" onclick="backfillPatients()">🔗 បង្កើត ID ឱ្យពួកគេ</button></div>' : '';
-  const rows = dbPatients.filter(p => !q || nameKey(p.name).includes(q) || String(p.id).toLowerCase().includes(q) || (qd && digitsOf(p.phone).includes(qd)))
+  const rows = dbPatients.filter(p => !q || nameKey(p.name).includes(q) || String(p.id).toLowerCase().includes(q) || (qd && digitsOf(p.phone).includes(qd)) || patientTreatments(p).some(treatment => nameKey(treatment).includes(q)))
     .sort((a,b) => String(b.id).localeCompare(String(a.id)));
   document.getElementById('ptList').innerHTML = rows.length ? rows.map(p => {
     const s = st[p.id] || {n:0, paid:0};
     const avatar = p.photo ? '<img class="pt-avatar-photo" src="'+esc(p.photo)+'" alt="">' : esc((p.name||'?').charAt(0).toUpperCase());
-    return '<div class="history-item pt-row" onclick="openPatientDetail(\''+esc(p.id)+'\')"><div class="history-item-left"><div class="history-avatar">'+avatar+'</div><div class="history-item-info"><div class="hi-name">'+esc(p.name)+'</div><div class="hi-meta"><span class="pt-id">'+esc(p.id)+'</span> '+esc(p.phone||'—')+(p.gender?' · '+esc(p.gender):'')+(p.age?' · '+esc(String(p.age))+' ឆ្នាំ':'')+'</div></div></div><div class="history-item-right"><div class="hi-meta">'+s.n+' ដង · '+dashMoney(s.paid)+'</div><button class="history-del-btn" type="button" title="លុបអ្នកជំងឺ" aria-label="លុបអ្នកជំងឺ" onclick="event.stopPropagation(); deletePatient(\''+esc(p.id)+'\')">🗑️</button></div></div>';
+    const matchingTreatments = q ? patientTreatments(p).filter(treatment => nameKey(treatment).includes(q)) : [];
+    const treatmentDetails = matchingTreatments.length ? '<div class="hi-meta">សេវាព្យាបាល៖ '+esc(matchingTreatments.join(', '))+'</div>' : '';
+    return '<div class="history-item pt-row" onclick="openPatientDetail(\''+esc(p.id)+'\')"><div class="history-item-left"><div class="history-avatar">'+avatar+'</div><div class="history-item-info"><div class="hi-name">'+esc(p.name)+'</div><div class="hi-meta"><span class="pt-id">'+esc(p.id)+'</span> '+esc(p.phone||'—')+(p.gender?' · '+esc(p.gender):'')+(p.age?' · '+esc(String(p.age))+' ឆ្នាំ':'')+'</div>'+treatmentDetails+'</div></div><div class="history-item-right"><div class="hi-meta">'+s.n+' ដង · '+dashMoney(s.paid)+'</div><button class="history-del-btn" type="button" title="លុបអ្នកជំងឺ" aria-label="លុបអ្នកជំងឺ" onclick="event.stopPropagation(); deletePatient(\''+esc(p.id)+'\')">🗑️</button></div></div>';
   }).join('') : '<div class="history-empty">រកមិនឃើញអ្នកជំងឺទេ</div>';
 }
 function previewPatientPhoto(input){
@@ -2049,6 +2131,8 @@ async function loadAppointments(force){
   const snap = await getDocs(collection(db,'appointments'));
   dbAppointments = snap.docs.map(d => Object.assign({}, d.data(), {id:d.id}));
   appointmentsLoaded = true;
+  renderDoctorOptions();
+  renderPatientSelectors();
 }
 function appointmentStatusLabel(status){
   return status==='completed' ? 'បានមកព្យាបាល' : status==='cancelled' ? 'បានលុបចោល' : 'បានកំណត់';
@@ -2111,6 +2195,8 @@ async function saveAppointment(){
     const id = ref.id;
     await setDoc(ref, Object.assign({id},record));
     dbAppointments.push(Object.assign({id},record));
+    renderDoctorOptions();
+    renderPatientSelectors();
     ['appointmentDate','appointmentDoctor','appointmentTreatment','appointmentNotes'].forEach(field => document.getElementById(field).value='');
     document.getElementById('appointmentStatus').value='scheduled';
     renderAppointments();
@@ -2132,6 +2218,8 @@ async function deleteAppointment(id){
     const db = await getFbDb();
     await deleteDoc(doc(db,'appointments',id));
     dbAppointments = dbAppointments.filter(item => item.id!==id);
+    renderDoctorOptions();
+    renderPatientSelectors();
     renderAppointments();
     showToast('បានលុបការណាត់ជួប', 'success');
   }catch(e){

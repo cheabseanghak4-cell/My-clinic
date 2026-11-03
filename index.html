@@ -113,7 +113,8 @@
               <div class="info-row">
                 <div class="info-field">
                   <label>គ្រូពេទ្យព្យាបាល / Doctor</label>
-                  <input id="doctorName" placeholder="ឈ្មោះគ្រូពេទ្យ">
+                  <input id="doctorName" list="invoiceDoctorOptions" placeholder="ឈ្មោះគ្រូពេទ្យ" oninput="filterInvoicePatientsByDoctor()">
+                  <datalist id="invoiceDoctorOptions"></datalist>
                 </div>
                 <div class="info-field">
                   <label>កាលបរិច្ឆេទ / Date</label>
@@ -392,7 +393,7 @@
               <img id="ptPhotoPreview" class="pt-photo-preview" alt="Patient photo preview" hidden>
               <button class="btn btn-primary" type="button" onclick="addPatientManual()">＋ បន្ថែមអ្នកជំងឺថ្មី</button>
             </div>
-            <input id="ptSearch" class="pt-search" type="search" placeholder="🔍 ស្វែងរកតាមឈ្មោះ លេខទូរស័ព្ទ ឬ Patient ID" oninput="renderPatients()">
+            <input id="ptSearch" class="pt-search" type="search" placeholder="🔍 ស្វែងរកតាមឈ្មោះ លេខទូរស័ព្ទ Patient ID ឬសេវាព្យាបាល (Implant, Ortho...)" oninput="renderPatients()">
             <div id="ptList" class="history-list"></div>
           </div>
         </div>
@@ -413,7 +414,7 @@
                 </select>
               </label>
               <label>ថ្ងៃ និងម៉ោង / Date &amp; Time <input id="appointmentDate" type="datetime-local"><small id="appointmentHoursHint" class="settings-hint"></small></label>
-              <label>គ្រូពេទ្យ / Doctor <input id="appointmentDoctor" type="text" placeholder="ឈ្មោះគ្រូពេទ្យ"></label>
+              <label>គ្រូពេទ្យ / Doctor <input id="appointmentDoctor" type="text" list="appointmentDoctorOptions" placeholder="ឈ្មោះគ្រូពេទ្យ" oninput="filterAppointmentPatientsByDoctor()"><datalist id="appointmentDoctorOptions"></datalist></label>
               <label>សេវាកម្ម / Treatment <input id="appointmentTreatment" type="text" placeholder="ការព្យាបាល ឬសេវាកម្ម"></label>
               <label>ស្ថានភាព / Status
                 <select id="appointmentStatus">
