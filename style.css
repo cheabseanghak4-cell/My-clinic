@@ -86,6 +86,31 @@
   }
   .new-invoice-btn:hover{background:var(--teal-dark);}
 
+  .language-toggle{
+    display:flex;
+    flex-shrink:0;
+    gap:2px;
+    padding:3px;
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:8px;
+    background:rgba(255,255,255,.08);
+    color:#fff;
+  }
+  .language-btn{
+    min-width:32px;
+    padding:5px 7px;
+    border:0;
+    border-radius:5px;
+    background:transparent;
+    color:inherit;
+    font-family:inherit;
+    font-size:11px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .language-btn[aria-pressed="true"]{background:#fff;color:#213a37;}
+  body[data-language="en"] .tab-btn .tab-sub{display:none;}
+
   /* ============ VIEWS ============ */
   .view{display:none;}
   .view.active{display:block; animation:fadeIn .18s ease;}
@@ -753,6 +778,57 @@
   border-left: 5px solid #00897b;
 }
 
+#prescriptionSection .presc-info-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#prescriptionSection .rx-patient-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #b8d8d4;
+  border-radius: 6px;
+  background: #fff;
+  color: #176f67;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#prescriptionSection .rx-patient-search-btn:hover {
+  border-color: #00897b;
+  background: #f5fbfa;
+}
+
+#prescriptionSection .rx-patient-search-panel {
+  max-width: 420px;
+  margin-top: 10px;
+}
+
+#prescriptionSection .rx-patient-search-panel input {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #c7d9d6;
+  border-radius: 6px;
+  background: #fff;
+  color: #213a37;
+  font: inherit;
+}
+
+#prescriptionSection .rx-patient-search-panel input:focus {
+  outline: 2px solid rgba(0, 137, 123, 0.2);
+  border-color: #00897b;
+}
+
 #prescriptionSection .presc-info-flex {
   display: flex;
   gap: 20px;
@@ -787,6 +863,399 @@
 #prescriptionSection .presc-flex-2 { flex: 2; }
 #prescriptionSection .presc-flex-08 { flex: 0.8; }
 
+#prescriptionSection .presc-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#prescriptionSection .presc-table {
+  min-width: 900px;
+}
+
+#prescriptionSection .presc-table .rx-period-column {
+  width: 70px;
+  text-align: center;
+}
+
+#prescriptionSection .presc-table .rx-period-column > span {
+  display: block;
+}
+
+#prescriptionSection .presc-table .rx-period-column small {
+  display: block;
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: 1px dotted #bdcbc8;
+  color: #3c4a47;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+#prescriptionSection .presc-table .rx-period-cell {
+  min-width: 86px;
+  text-align: center;
+}
+
+#prescriptionSection .rx-schedule-cell {
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  line-height: 1.35;
+}
+
+#prescriptionSection .rx-schedule-cell strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#prescriptionSection .rx-schedule-cell small {
+  color: #65716f;
+  font-size: 10px;
+}
+
+#prescriptionSection .rx-schedule-empty {
+  color: #a0aaa8;
+}
+
+#prescriptionSection .rx-instructions-cell > div + div {
+  margin-top: 3px;
+}
+
+#prescriptionSection .rx-entry-total {
+  display: block;
+  margin-top: 4px;
+  color: #65716f;
+  font-size: 10px;
+  text-align: center;
+}
+
+#prescriptionSection .presc-table select {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 1px solid #d5dfdc;
+  border-radius: 6px;
+  background: #fff;
+  box-sizing: border-box;
+  font: inherit;
+}
+
+#prescriptionSection .rx-entry-row {
+  background: #f8faf9;
+}
+
+#prescriptionSection .rx-time-picker {
+  min-width: 130px;
+}
+
+#prescriptionSection .rx-time-picker > summary {
+  min-height: 36px;
+  max-width: 240px;
+  padding: 8px 28px 8px 10px;
+  border: 1px solid #d5dfdc;
+  border-radius: 6px;
+  background: #fff;
+  color: #3c4a47;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#prescriptionSection .rx-time-picker > summary::-webkit-details-marker {
+  display: none;
+}
+
+#prescriptionSection .rx-time-picker > summary::after {
+  content: "";
+  position: absolute;
+  top: 13px;
+  right: 11px;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #65716f;
+  border-bottom: 1.5px solid #65716f;
+  transform: rotate(45deg);
+}
+
+#prescriptionSection .rx-time-options {
+  display: grid;
+  margin-top: 4px;
+  min-width: 190px;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #d5dfdc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+#prescriptionSection .rx-time-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #3c4a47;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+#prescriptionSection .rx-time-choice {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+  cursor: pointer;
+}
+
+#prescriptionSection .rx-time-choice input {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+#prescriptionSection .rx-dose-stepper {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+#prescriptionSection .rx-dose-unit {
+  color: #65716f;
+  font-size: 11px;
+}
+
+#prescriptionSection .rx-dose-stepper button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #d5dfdc;
+  border-radius: 5px;
+  background: #f7faf9;
+  color: #213a37;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#prescriptionSection .rx-dose-stepper button:hover {
+  border-color: #00897b;
+  background: #eef8f6;
+}
+
+#prescriptionSection .rx-dose-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+}
+
+#prescriptionSection .rx-entry-add-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: #00897b;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.med-default-form {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  background: #f8faf9;
+  border: 1px solid #e3eae8;
+  border-radius: 10px;
+}
+
+.med-default-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.med-default-grid label,
+.med-instructions-field {
+  display: grid;
+  gap: 6px;
+  color: #3c4a47;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.med-default-grid input,
+.med-instructions-field input,
+.med-instructions-field select,
+.med-schedule-controls input[type="number"],
+.med-schedule-controls input[type="time"] {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #d5dfdc;
+  border-radius: 7px;
+  background: #fff;
+  box-sizing: border-box;
+  font: inherit;
+}
+
+.med-instructions-field select {
+  color: #3c4a47;
+}
+
+.med-schedule-picker {
+  min-width: 0;
+}
+
+.med-schedule-picker > summary {
+  min-height: 42px;
+  padding: 11px 36px 11px 12px;
+  border: 1px solid #d5dfdc;
+  border-radius: 7px;
+  background: #fff;
+  color: #3c4a47;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+
+.med-schedule-picker > summary::-webkit-details-marker {
+  display: none;
+}
+
+.med-schedule-picker > summary::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid #65716f;
+  border-bottom: 1.5px solid #65716f;
+  transform: rotate(45deg);
+}
+
+.med-schedule-grid {
+  display: grid;
+  margin-top: 5px;
+  padding: 4px 12px;
+  border: 1px solid #e3eae8;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.med-schedule-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 6px;
+  padding: 9px 0;
+  border-bottom: 1px solid #edf1f0;
+}
+
+.med-schedule-item:last-child {
+  border-bottom: 0;
+}
+
+.med-schedule-item label {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+  margin: 0;
+  line-height: 1.4;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.med-schedule-period input[type="checkbox"] {
+  accent-color: #00897b;
+}
+
+.med-schedule-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 8px;
+}
+
+.med-schedule-time {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr minmax(120px, 180px);
+  align-items: center;
+  gap: 10px;
+  color: #65716f;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.med-dose-control {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.med-dose-control > div {
+  display: grid;
+  grid-template-columns: 28px 42px 28px;
+  gap: 4px;
+}
+
+.med-dose-control button {
+  min-height: 38px;
+  padding: 0;
+  border: 1px solid #d5dfdc;
+  border-radius: 6px;
+  background: #f7faf9;
+  color: #213a37;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.med-dose-control button:hover {
+  border-color: #00897b;
+  background: #eef8f6;
+}
+
+.med-dose-control input[type="number"] {
+  width: 42px;
+  min-height: 34px;
+  padding: 5px 3px;
+  text-align: center;
+}
+
+.med-dose-unit {
+  color: #65716f;
+  font-size: 11px;
+}
+
+.med-schedule-controls input[type="time"] {
+  min-height: 40px;
+  padding: 7px;
+}
+
+.med-manage-item,
+.med-saved-details {
+  display: block;
+}
+
+.med-saved-details {
+  margin-top: 4px;
+  color: #6b7774;
+  font-size: 11px;
+  font-weight: 400;
+}
+
 #prescriptionSection label {
   display: block;
   font-size: 13px;
@@ -807,7 +1276,7 @@
 
 #prescriptionSection .presc-btn-wrapper {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 #prescriptionSection .presc-btn-add {
@@ -840,6 +1309,26 @@
   border-bottom: 1px solid #eee;
 }
 
+#prescriptionSection .rx-schedule-lines {
+  display: grid;
+  gap: 7px;
+}
+
+#prescriptionSection .rx-schedule-item {
+  display: grid;
+  gap: 2px;
+  line-height: 1.4;
+}
+
+#prescriptionSection .rx-schedule-item strong {
+  font-weight: 600;
+}
+
+#prescriptionSection .rx-schedule-item span {
+  color: #65716f;
+  font-size: 11px;
+}
+
 #prescriptionSection .text-center { text-align: center; }
 #prescriptionSection .text-muted { color: #999; }
 
@@ -869,6 +1358,43 @@
   padding: 12px 14px;
   margin-bottom: 10px;
   background: #fbfcfc;
+}
+
+@media (max-width: 800px) {
+  #prescriptionSection .presc-input-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  #prescriptionSection .presc-input-row > div {
+    min-width: 0;
+  }
+
+  .med-default-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .med-schedule-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1100px) {
+  .med-schedule-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .med-default-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .med-schedule-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    padding: 9px 0;
+  }
 }
 
 #prescriptionSection .presc-history-date {
@@ -910,20 +1436,20 @@
 .rx-print-only{display:none;}
 .rx-print-title{
   text-align:center;
-  padding-bottom:12px;
-  margin-bottom:16px;
+  padding-bottom:8px;
+  margin-bottom:10px;
   border-bottom:2px solid #00897b;
 }
-.rx-print-title #rxClinicLogoImg{width:150px; height:150px; border-radius:10px; object-fit:contain; margin-bottom:10px;}
+.rx-print-title #rxClinicLogoImg{width:125px; height:125px; border-radius:10px; object-fit:contain; margin-bottom:6px;}
 .rx-print-title #rxClinicNameDisplay{font-size:22px; font-weight:700; color:#00897b;}
 .rx-print-title #rxClinicSubDisplay{font-size:12px; color:#555; margin-top:2px;}
 .rx-print-title h1{font-size:17px; margin:10px 0 2px; color:#333;}
 .rx-print-title #rxPrintDate{font-size:11.5px; color:#777;}
 .rx-print-signature{
-  margin-top:95px;
+  margin-top:36px;
   display:flex; flex-direction:column; align-items:flex-end;
 }
-.rx-sig-line{width:180px; border-top1px: solid #333; margin-bottom:6px;}
+.rx-sig-line{width:180px; border-top:1px solid #333; margin-bottom:6px;}
 .rx-print-signature div:last-child{font-size:11px; color:#666; text-align:center; width:180px; line-height:1.4;}
 
 @media print{
@@ -942,13 +1468,32 @@
   body.print-rx #prescriptionSection{max-width:100%;}
   body.print-rx .rx-print-only{display:block !important;}
   body.print-rx .presc-header-card{display:none !important;}
-  body.print-rx #rxAddCardTitle,
-  body.print-rx #rxAddCardInputRow,
-  body.print-rx .presc-btn-wrapper,
+  body.print-rx #rxPatientSearchToggle,
+  body.print-rx .rx-patient-search-panel{display:none !important;}
+  body.print-rx .presc-info-card{padding:9px 12px; margin-bottom:12px; font-size:12px;}
+  body.print-rx .presc-info-flex{gap:8px 16px; margin-top:5px;}
+  body.print-rx .rx-print-signature{margin-top:45px;}
+  body.print-rx #prescriptionSection .presc-table-wrap{overflow:visible;}
+  body.print-rx .rx-entry-row,
+  body.print-rx .rx-empty-row,
   body.print-rx .presc-save-wrapper,
   body.print-rx #rxHistoryCard{display:none !important;}
   body.print-rx #rxDelColHeader,
   body.print-rx .presc-table td:last-child{display:none !important;}
+  #prescriptionSection .presc-table{min-width:0; width:100%; table-layout:fixed;}
+  #prescriptionSection .presc-table th,
+  #prescriptionSection .presc-table td{padding:7px 4px; font-size:12px; word-break:break-word;}
+  #prescriptionSection .presc-table th:first-child{width:30px !important;}
+  #prescriptionSection .presc-table .rx-medication-column{width:130px;}
+  #prescriptionSection .presc-table .rx-period-column{width:50px;}
+  #prescriptionSection .presc-table .rx-period-cell{min-width:0;}
+  #prescriptionSection .presc-table .rx-days-column{width:42px !important;}
+  #prescriptionSection .presc-table .rx-instructions-column{width:110px !important;}
+  #prescriptionSection .presc-table .rx-period-column small{font-size:11px;}
+  #prescriptionSection .rx-schedule-cell strong{font-size:12px;}
+  #prescriptionSection .rx-schedule-cell small{font-size:10px;}
+  #prescriptionSection .rx-instructions-cell{font-size:11px !important;}
+  #prescriptionSection .rx-time-options{display:none;}
   body.print-rx .presc-info-card{border-left-color:#00897b; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
   body.print-rx .presc-form-card{box-shadow:none; padding:0; margin-bottom:0;}
 }
@@ -1010,6 +1555,8 @@
     .app-tabs{flex-direction:row; flex:1; overflow-x:auto; overflow-y:hidden;}
     .tab-btn{flex-direction:row; align-items:center; white-space:nowrap; padding:8px 12px;}
     .tab-btn .tab-label{font-size:13px;} .tab-btn .tab-sub{display:none;}
+    .language-toggle{border-color:#d5dfdc;background:#f4f6f7;color:#213a37;}
+    .language-btn[aria-pressed="true"]{background:#00897b;color:#fff;}
     .new-invoice-btn{width:auto; margin-top:0;}
     .app-main{padding:16px 12px 40px;}
   }

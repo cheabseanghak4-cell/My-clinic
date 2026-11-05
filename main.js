@@ -25,6 +25,214 @@ const FIREBASE_CONFIG = {
 
 function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+let appLanguage = 'km';
+const languageTextSources = new WeakMap();
+const languageAttributeSources = new WeakMap();
+const englishToKhmer = {
+  'Dental Clinic System':'ប្រព័ន្ធគិតលុយពេទ្យធ្មេញ',
+  'Dashboard':'សង្ខេប',
+  'New Invoice':'វិក្កយបត្រថ្មី',
+  'Tooth#':'លេខធ្មេញ',
+  'Treatment':'ការព្យាបាល',
+  'Qty':'ចំនួន',
+  'Price':'តម្លៃ',
+  'Discount':'បញ្ចុះតម្លៃ',
+  'Subtotal':'សរុបរង',
+  'Select medication':'ជ្រើសរើសថ្នាំ',
+  'Select times':'ជ្រើសរើសម៉ោង',
+  'Select a medication first':'សូមជ្រើសរើសថ្នាំជាមុន',
+  'Before / After meals':'មុន / ក្រោយអាហារ',
+  'Days':'ចំនួនថ្ងៃ',
+  'Total tablets':'ចំនួនគ្រាប់សរុប',
+  'Medication':'ថ្នាំ',
+  'Time':'ម៉ោង',
+  'Action':'សកម្មភាព',
+  'Add medication':'បន្ថែមថ្នាំ',
+  'No medications added yet':'មិនទាន់បានបន្ថែមថ្នាំទេ',
+  'Before meals':'មុនអាហារ',
+  'After meals':'ក្រោយអាហារ',
+  'Male':'ប្រុស',
+  'Female':'ស្រី',
+  'Adult':'មនុស្សពេញវ័យ',
+  'Child':'កុមារ',
+  'Tooth Chart (FDI)':'តារាងធ្មេញ (FDI)',
+  'Permanent teeth · 11–48':'ធ្មេញអចិន្ត្រៃយ៍ · 11–48',
+  'Primary teeth · 51–85':'ធ្មេញទឹកដោះ · 51–85',
+  'Sub Total':'ប្រាក់សរុប',
+  'Grand Total':'សរុប',
+  'Total Amount Due':'ទឹកប្រាក់នៅសល់',
+  'Total Amount Paid':'ប្រាក់សរុបបានបង់',
+  'Payment Method':'វិធីបង់ប្រាក់',
+  'Cashier Signature':'ហត្ថលេខាអ្នកគិតលុយ',
+  'Select':'ជ្រើសរើស',
+  'Note':'ចំណាំ',
+  'Invoice No':'លេខវិក្កយបត្រ',
+  'Invoice Details':'ព័ត៌មានវិក្កយបត្រ',
+  'Patient Details':'ព័ត៌មានអ្នកជំងឺ',
+  'Cashier':'អ្នកគិតលុយ',
+  'Doctor':'គ្រូពេទ្យ',
+  'Date':'កាលបរិច្ឆេទ',
+  'Patient Name':'ឈ្មោះអ្នកជំងឺ',
+  'Sex':'ភេទ',
+  'Age':'អាយុ',
+  'Tel':'ទូរស័ព្ទ',
+  'PRESCRIPTION':'វេជ្ជបញ្ជា',
+  'Prescription':'វេជ្ជបញ្ជា',
+  'Patient Info':'ព័ត៌មានអ្នកជំងឺ',
+  'Name':'ឈ្មោះ',
+  'Gender/Age':'ភេទ/អាយុ',
+  'Phone':'ទូរស័ព្ទ',
+  'Select a Treatment':'ជ្រើសរើសការព្យាបាល',
+  'Full Mouth':'ធ្មេញទាំងអស់',
+  'Treated':'បានព្យាបាល',
+  'Untreated':'មិនទាន់ព្យាបាល',
+  'Print':'បោះពុម្ព',
+  'Save prescription':'រក្សាទុកវេជ្ជបញ្ជា',
+  'Prescription History':'ប្រវត្តិវេជ្ជបញ្ជា'
+};
+const khmerToEnglish = {
+  'វិក្កយបត្រថ្មី':'New Invoice',
+  'ប្រភេទធ្មេញ':'Tooth type',
+  'ជ្រើសរើសតារាងធ្មេញអ្នកជំងឺ':'Select patient tooth chart',
+  'មនុស្សពេញវ័យ':'Adult',
+  'កុមារ':'Child',
+  'លើ · UPPER':'Upper',
+  'ក្រោម · LOWER':'Lower',
+  'បានព្យាបាល (Treated)':'Treated',
+  'មិនទាន់ព្យាបាល (Untreated)':'Untreated',
+  'ចុចធ្មេញមួយ ឬច្រើន រួចបញ្ចូលសេវាកម្មខាងក្រោម · FDI primary teeth: 51–55, 61–65, 71–75, 81–85':'Select one or more teeth, then add a treatment below. FDI primary teeth: 51–55, 61–65, 71–75, 81–85',
+  'មិនទាន់មានធាតុនៅឡើយទេ — ចុច + ដើម្បីបញ្ចូល':'No items yet. Click + to add one.',
+  'ប្រាក់សរុប':'Total',
+  'បញ្ចុះថ្លៃ':'Discount',
+  'បានបង់':'Paid',
+  'ប្រុស':'Male',
+  'ស្រី':'Female',
+  'សេវាកម្មថ្មីនឹងត្រូវបានរក្សាទុកដោយស្វ័យប្រវត្តិ — គ្រប់គ្រងទាំងអស់នៅផ្នែក':'New services are saved automatically. Manage them in',
+  'បន្ថែម':'Add',
+  'សរុប':'Total',
+  'វិធីបង់ប្រាក់':'Payment method',
+  'ទឹកប្រាក់នៅសល់':'Amount due',
+  'ប្រាក់សរុបបានបង់':'Total paid',
+  'បង្កើត និងគ្រប់គ្រងវេជ្ជបញ្ជាសម្រាប់អ្នកជំងឺ':'Create and manage patient prescriptions',
+  'ភេទ/អាយុ · Gender/Age':'Gender/Age',
+  '⚠️ សូមបំពេញឈ្មោះអ្នកជំងឺនៅផ្ទាំង "វិក្កយបត្រ" សិន ដើម្បីភ្ជាប់វេជ្ជបញ្ជាទៅអ្នកជំងឺនេះ។':'⚠️ Enter a patient name in the "Invoice" tab first to link this prescription.',
+  'សូមបញ្ចូលឈ្មោះអ្នកជំងឺនៅផ្ទាំង "វិក្កយបត្រ" សិន':'Enter a patient name in the "Invoice" tab first',
+  'ហត្ថលេខាគ្រូពេទ្យ':'Doctor Signature',
+  'រក្សាទុកវេជ្ជបញ្ជា':'Save prescription',
+  'បោះពុម្ព':'Print',
+  'ប្រវត្តិវេជ្ជបញ្ជា':'Prescription History',
+  'សង្ខេបស្ថិតិ និងសកម្មភាពប្រចាំថ្ងៃ':'Daily statistics and activity',
+  'ជ្រើសរើសខែ':'Select month',
+  'កំពុងទាញទិន្នន័យ...':'Loading data...',
+  'បើកជម្រើសអ្នកជំងឺ':'Open patient options',
+  'ចុចទីនេះ ដើម្បីជ្រើសអ្នកជំងឺចាស់':'Click here to select an existing patient',
+  'ឬបន្ថែមអ្នកជំងឺថ្មី':'or add a new patient',
+  'អ្នកជំងឺសរុប':'Total patients',
+  'អ្នកជំងឺមិនស្ទួន':'Unique patients',
+  'អ្នកជំងឺថ្មី':'New patients',
+  'មកព្យាបាលលើកដំបូង':'First visit',
+  'អ្នកជំងឺត្រឡប់មកវិញ':'Returning patients',
+  'ធ្លាប់មកព្យាបាលពីមុន':'Previously treated',
+  'ប្រាក់បានទទួល':'Revenue received',
+  'ប្រាក់ចំណូលតាមថ្ងៃ':'Daily revenue',
+  'ប្រាក់ចំណូលតាមខែ':'Monthly revenue',
+  'ចុចលើខែណាមួយ ដើម្បីប្រៀបធៀប':'Click a month to compare',
+  'វិច្ឆិកា':'November',
+  'តុលា':'October',
+  'កញ្ញា':'September',
+  'សីហា':'August',
+  'កក្កដា':'July',
+  'មិថុនា':'June',
+  'ឧសភា':'May',
+  'មេសា':'April',
+  'មីនា':'March',
+  'កុម្ភៈ':'February',
+  'មករា':'January'
+};
+
+function localizeTextNode(node){
+  const original = languageTextSources.has(node) ? languageTextSources.get(node) : node.nodeValue;
+  languageTextSources.set(node, original);
+  const whitespace = original.match(/^(\s*)([\s\S]*?)(\s*)$/);
+  const content = whitespace[2];
+  const normalized = content.replace(/\s+/g, ' ').trim();
+  const pair = normalized.match(/^(.*?)\s+\/\s+(.*?)$/);
+  if(pair && /[\u1780-\u17ff]/.test(pair[1] + pair[2])){
+    const khmer = /[\u1780-\u17ff]/.test(pair[1]) ? pair[1].trim() : pair[2].trim();
+    const english = /[\u1780-\u17ff]/.test(pair[1]) ? pair[2].trim() : pair[1].trim();
+    node.nodeValue = whitespace[1] + (appLanguage==='km' ? khmer : english) + whitespace[3];
+    return;
+  }
+  const dictionary = appLanguage==='km' ? englishToKhmer : khmerToEnglish;
+  node.nodeValue = whitespace[1] + (dictionary[normalized] || normalized) + whitespace[3];
+}
+
+function localizeAppTree(root){
+  if(root.nodeType===Node.TEXT_NODE){
+    localizeTextNode(root);
+    return;
+  }
+  if(root.nodeType===Node.ELEMENT_NODE){
+    const languageElements = [];
+    if(root.matches('[data-lang-km][data-lang-en]')) languageElements.push(root);
+    languageElements.push(...root.querySelectorAll('[data-lang-km][data-lang-en]'));
+    languageElements.forEach(element=>{
+      const text = appLanguage==='km' ? element.dataset.langKm : element.dataset.langEn;
+      if(element.textContent!==text) element.textContent = text;
+    });
+  }
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while((node=walker.nextNode())){
+    if(node.parentElement && node.parentElement.closest('[data-lang-km][data-lang-en]')) continue;
+    localizeTextNode(node);
+  }
+  if(root.nodeType===Node.ELEMENT_NODE){
+    root.querySelectorAll('[placeholder], [title], [aria-label]').forEach(element=>{
+      ['placeholder','title','aria-label'].forEach(attribute=>{
+        if(!element.hasAttribute(attribute)) return;
+        let originals = languageAttributeSources.get(element);
+        if(!originals){ originals = {}; languageAttributeSources.set(element, originals); }
+        if(!(attribute in originals)) originals[attribute] = element.getAttribute(attribute);
+        const original = originals[attribute];
+        const pair = original.match(/^\s*(.*?)\s+\/\s+(.*?)\s*$/s);
+        if(pair && /[\u1780-\u17ff]/.test(pair[1] + pair[2])){
+          const khmer = /[\u1780-\u17ff]/.test(pair[1]) ? pair[1].trim() : pair[2].trim();
+          const english = /[\u1780-\u17ff]/.test(pair[1]) ? pair[2].trim() : pair[1].trim();
+          element.setAttribute(attribute, appLanguage==='km' ? khmer : english);
+        }
+      });
+    });
+  }
+}
+
+function setAppLanguage(language){
+  appLanguage = language==='en' ? 'en' : 'km';
+  document.documentElement.lang = appLanguage;
+  document.body.dataset.language = appLanguage;
+  try{ localStorage.setItem('myclinic-language', appLanguage); }catch(e){}
+  document.querySelectorAll('[data-app-language]').forEach(button=>{
+    button.setAttribute('aria-pressed', String(button.dataset.appLanguage===appLanguage));
+  });
+  localizeAppTree(document.body);
+  updatePresetScheduleSummary();
+  updateRxPeriodHeaderTimes();
+}
+
+try{ appLanguage = localStorage.getItem('myclinic-language')==='en' ? 'en' : 'km'; }catch(e){}
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('[data-app-language]').forEach(button=>{
+    button.addEventListener('click', ()=>setAppLanguage(button.dataset.appLanguage));
+  });
+  setAppLanguage(appLanguage);
+  const languageObserver = new MutationObserver(records=>records.forEach(record=>{
+    record.addedNodes.forEach(node=>{
+      if(node.nodeType===Node.ELEMENT_NODE || node.nodeType===Node.TEXT_NODE) localizeAppTree(node);
+    });
+  }));
+  languageObserver.observe(document.body, {childList:true, subtree:true});
+});
+
 /* ---------- local persistent storage (works on any web server, survives refresh) ---------- */
 const LocalStore = {
   async get(key){
@@ -1325,23 +1533,81 @@ async function clearAll(){
 }
 
 /* ---------- prescription ---------- */
-let rxMedications = []; // draft list: {name, dosage, qty}
-let presetMedications = []; // {id, name, dosage}
-
+let rxMedications = [];
+let presetMedications = [];
+const MEDICATION_PERIODS = [
+  {key:'Morning', period:'ព្រឹក', english:'Morning', defaultTime:'08:00'},
+  {key:'Noon', period:'ថ្ងៃ', english:'Midday', defaultTime:'12:00'},
+  {key:'Afternoon', period:'ល្ងាច', english:'Evening', defaultTime:'18:00'},
+  {key:'Night', period:'យប់', english:'Night', defaultTime:'20:00'}
+];
 async function loadPresetMedications(){
   try{
     const r = await LocalStore.get('preset-medications');
-    if(r && r.value) presetMedications = JSON.parse(r.value);
-  }catch(e){ presetMedications = []; }
+    if(r && r.value){
+      const saved = JSON.parse(r.value);
+      if(!Array.isArray(saved)) throw new Error('Saved medication data is invalid');
+      presetMedications = saved;
+    }
+  }catch(e){
+    presetMedications = [];
+    showToast('មិនអាចផ្ទុកបញ្ជីថ្នាំដែលបានរក្សាទុកបានទេ', 'error');
+  }
   renderMedOptions();
   renderMedManageList();
 }
 async function savePresetMedications(){
-  try{ await LocalStore.set('preset-medications', JSON.stringify(presetMedications)); }catch(e){}
+  const result = await LocalStore.set('preset-medications', JSON.stringify(presetMedications));
+  if(!result) throw new Error('Browser storage is unavailable');
 }
 function renderMedOptions(){
-  const dl = document.getElementById('rxMedOptions');
-  if(dl) dl.innerHTML = presetMedications.map(m=>`<option value="${esc(m.name)}"></option>`).join('');
+  renderRxMedTable();
+}
+function formatMedicationSchedule(schedule){
+  if(!Array.isArray(schedule)) return '';
+  return schedule
+    .filter(item => item && item.period)
+    .map(item => `${item.period} ${Math.max(1, parseInt(item.dose, 10) || 1)}${item.time ? ` (${item.time})` : ''}`)
+    .join(' · ');
+}
+function renderPrescriptionScheduleCell(schedule, period, timeInfo){
+  if(!Array.isArray(schedule)) return '—';
+  const item = schedule.find(entry => entry && (entry.period===period.period || entry.period===period.english));
+  if(!item) return '<span class="rx-schedule-empty">—</span>';
+  const dose = Math.max(1, parseInt(item.dose, 10) || 1);
+  const variedTime = timeInfo && timeInfo.varies && item.time;
+  const timeLabel = appLanguage==='km' ? 'ម៉ោង៖' : 'Time:';
+  return `<div class="rx-schedule-cell">
+    <strong>${dose}</strong>
+    ${variedTime ? `<small><span data-lang-km="ម៉ោង៖ ${esc(item.time)}" data-lang-en="Time: ${esc(item.time)}">${timeLabel} ${esc(item.time)}</span></small>` : ''}
+  </div>`;
+}
+function getRxPeriodName(period, language){
+  const knownPeriod = MEDICATION_PERIODS.find(item => item.period===period || item.english===period);
+  if(!knownPeriod) return period;
+  return language==='km' ? knownPeriod.period : knownPeriod.english;
+}
+function getRxPeriodTimeInfo(period){
+  const times = Array.from(new Set(rxMedications.flatMap(medication =>
+    (Array.isArray(medication.schedule) ? medication.schedule : [])
+      .filter(item => item && (item.period===period.period || item.period===period.english) && item.time)
+      .map(item => item.time)
+  )));
+  if(times.length===1) return {header:times[0], varies:false};
+  if(times.length>1) return {header:appLanguage==='km' ? 'ម៉ោងខុសគ្នា' : 'Varies', varies:true};
+  return {header:period.defaultTime || '', varies:false};
+}
+function updateRxPeriodHeaderTimes(){
+  MEDICATION_PERIODS.forEach(period => {
+    const header = document.getElementById(`rxPeriodHeaderTime${period.key}`);
+    if(header) header.textContent = getRxPeriodTimeInfo(period).header;
+  });
+}
+function getMedicationDailyDose(medication){
+  const dose = Number(medication.dosage);
+  if(Number.isFinite(dose) && dose > 0) return dose;
+  if(!Array.isArray(medication.schedule)) return 0;
+  return medication.schedule.reduce((sum, item) => sum + (parseInt(item.dose, 10) || 0), 0);
 }
 function renderMedManageList(){
   const list = document.getElementById('medManageList');
@@ -1352,7 +1618,17 @@ function renderMedManageList(){
   }
   list.innerHTML = presetMedications.map(m=>`
     <div class="service-manage-item">
-      <span>${esc(m.name)}${m.dosage ? (' — '+esc(m.dosage)) : ''}</span>
+      <span>
+        <b>${esc(m.name)}</b>
+        <small class="med-saved-details">
+          ${getMedicationDailyDose(m) ? `${getMedicationDailyDose(m)} គ្រាប់/ថ្ងៃ` : ''}
+          ${formatMedicationSchedule(m.schedule) ? ` · ${esc(formatMedicationSchedule(m.schedule))}` : ''}
+          ${m.days ? ` · ${esc(String(m.days))} ថ្ងៃ` : ''}
+          ${m.qty ? ` · សរុប ${esc(String(m.qty))} គ្រាប់` : ''}
+          ${m.mealTiming ? ` · ${esc(m.mealTiming)}` : ''}
+          ${m.instructions ? ` · ${esc(m.instructions)}` : ''}
+        </small>
+      </span>
       <button class="del-btn" onclick="deletePresetMedication('${m.id}')">✕</button>
     </div>`).join('');
 }
@@ -1360,38 +1636,112 @@ async function deletePresetMedication(id){
   const med = presetMedications.find(m=>m.id===id);
   const ok = await showConfirm('លុបថ្នាំ "'+(med?med.name:'')+'" ចេញពីបញ្ជី?', {icon:'🗑️', okLabel:'លុប'});
   if(!ok) return;
+  const previous = presetMedications;
   presetMedications = presetMedications.filter(m=>m.id!==id);
-  await savePresetMedications();
+  try{
+    await savePresetMedications();
+  }catch(e){
+    presetMedications = previous;
+    showToast('មិនអាចរក្សាទុកការលុបថ្នាំបានទេ', 'error');
+    return;
+  }
   renderMedOptions();
   renderMedManageList();
   showToast('បានលុបថ្នាំរួចរាល់', 'success');
 }
+function readMedicationSchedule(prefix){
+  return MEDICATION_PERIODS
+    .filter(item => {
+      const periodControl = document.getElementById(`${prefix}${item.key}`);
+      return periodControl ? periodControl.checked : Boolean(document.getElementById(`${prefix}${item.key}Time`).value);
+    })
+    .map(item => ({
+      period: item.period,
+      dose: Math.max(1, parseInt(document.getElementById(`${prefix}${item.key}Dose`).value, 10) || 1),
+      time: document.getElementById(`${prefix}${item.key}Time`).value
+    }));
+}
+function updatePresetDailyDose(clearWhenEmpty){
+  const schedule = readMedicationSchedule('newMed');
+  const dosageEl = document.getElementById('newMedDosage');
+  dosageEl.readOnly = schedule.length > 0;
+  if(schedule.length){
+    dosageEl.value = String(schedule.reduce((sum, item) => sum + item.dose, 0));
+  }else if(clearWhenEmpty){
+    dosageEl.value = '';
+  }
+  updatePresetScheduleSummary();
+}
+function updatePresetScheduleSummary(){
+  const summary = document.getElementById('newMedScheduleSummary');
+  if(!summary) return;
+  const selected = readMedicationSchedule('newMed');
+  summary.textContent = selected.length
+    ? selected.map(item => `${getRxPeriodLabel(item.period)}${item.time ? ` (${item.time})` : ''}`).join(', ')
+    : (appLanguage==='km' ? 'ជ្រើសរើសម៉ោងប្រើថ្នាំ' : 'Select times');
+}
+function adjustPresetDose(periodKey, change){
+  const dose = document.getElementById(`newMed${periodKey}Dose`);
+  dose.value = String(Math.max(1, (parseInt(dose.value, 10) || 1) + change));
+  updatePresetDailyDose();
+}
+function readOptionalPositiveInteger(id){
+  const value = document.getElementById(id).value.trim();
+  if(!value) return 0;
+  const number = Number(value);
+  return Number.isInteger(number) && number > 0 ? number : null;
+}
+function resetPresetMedicationForm(){
+  ['newMedName','newMedDosage','newMedDays','newMedQty','newMedInstructions'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('newMedMealTiming').value = '';
+  document.getElementById('newMedDosage').readOnly = false;
+  MEDICATION_PERIODS.forEach(item => {
+    document.getElementById(`newMed${item.key}`).checked = false;
+    document.getElementById(`newMed${item.key}Dose`).value = '1';
+  });
+  updatePresetScheduleSummary();
+}
 async function addPresetMedicationDirect(){
   const nameEl = document.getElementById('newMedName');
-  const dosageEl = document.getElementById('newMedDosage');
   const name = nameEl.value.trim();
-  const dosage = dosageEl.value.trim();
   if(!name){ nameEl.focus(); return; }
   if(presetMedications.some(m=>m.name===name)){
     showToast('ថ្នាំនេះមានរួចហើយ', 'error');
     return;
   }
-  presetMedications.push({id:'m'+Date.now(), name, dosage});
-  await savePresetMedications();
+  const dosageValue = readOptionalPositiveInteger('newMedDosage');
+  const days = readOptionalPositiveInteger('newMedDays');
+  const qty = readOptionalPositiveInteger('newMedQty');
+  if(dosageValue === null || days === null || qty === null){
+    showToast('ចំនួនគ្រាប់ និងចំនួនថ្ងៃ ត្រូវតែជាចំនួនគត់ធំជាងសូន្យ', 'error');
+    return;
+  }
+  const medication = {
+    id:'m'+Date.now(),
+    name,
+    dosage:dosageValue ? String(dosageValue) : '',
+    schedule:readMedicationSchedule('newMed'),
+    days,
+    qty,
+    mealTiming:document.getElementById('newMedMealTiming').value,
+    instructions:document.getElementById('newMedInstructions').value.trim()
+  };
+  presetMedications.push(medication);
+  try{
+    await savePresetMedications();
+  }catch(e){
+    presetMedications.pop();
+    showToast('មិនអាចរក្សាទុកថ្នាំបានទេ។ សូមពិនិត្យការកំណត់ផ្ទុករបស់កម្មវិធី។', 'error');
+    return;
+  }
   renderMedOptions();
   renderMedManageList();
-  nameEl.value=''; dosageEl.value='';
+  resetPresetMedicationForm();
   nameEl.focus();
   showToast('បានបន្ថែមថ្នាំរួចរាល់', 'success');
 }
-function onRxMedNameChange(){
-  const name = document.getElementById('rxMedName').value.trim();
-  const match = presetMedications.find(m=>m.name===name);
-  if(match && match.dosage){
-    document.getElementById('rxMedDosage').value = match.dosage;
-  }
-}
-
 function rxKey(){
   const key = patientKey();
   if(!key) return null;
@@ -1450,78 +1800,206 @@ function refreshPrescriptionView(){
   loadRxHistory();
 }
 function addMedication(){
-  const nameEl = document.getElementById('rxMedName');
-  const dosageEl = document.getElementById('rxMedDosage');
-  const qtyEl = document.getElementById('rxMedQty');
-
-  const name = nameEl ? nameEl.value.trim() : '';
-  const dosage = dosageEl ? dosageEl.value.trim() : '';
-  const qty = qtyEl ? (parseInt(qtyEl.value) || 1) : 1;
-  const days = 0; // កំណត់ 0 ដោយស្វ័យប្រវត្តិ (មិនបាច់មាន input days ទេ)
-
-  if(!name){ 
-    if(nameEl) nameEl.focus(); 
-    if(typeof showToast === 'function') showToast('សូមបញ្ចូលឈ្មោះថ្នាំ', 'error'); 
-    return; 
+  const medicationSelect = document.getElementById('rxEntryMedication');
+  const medication = presetMedications.find(item => item.id===medicationSelect.value);
+  if(!medication){
+    medicationSelect.focus();
+    showToast('សូមជ្រើសរើសឈ្មោះថ្នាំ', 'error');
+    return;
   }
-
-  rxMedications.push({name, dosage, qty, days});
+  const schedule = getRxEntrySchedule(medication);
+  if(schedule.length===0){
+    const timeOption = document.querySelector('#rxEntryTimeOptions input');
+    if(timeOption) timeOption.focus();
+    showToast('សូមជ្រើសរើសពេលប្រើថ្នាំ / Select at least one time', 'error');
+    return;
+  }
+  const daysSelect = document.getElementById('rxEntryDays');
+  const days = Number(daysSelect.value);
+  if(!Number.isInteger(days) || days < 1){
+    daysSelect.focus();
+    showToast('សូមជ្រើសរើសចំនួនថ្ងៃ', 'error');
+    return;
+  }
+  const mealTiming = document.getElementById('rxEntryMeal').value;
+  if(!mealTiming){
+    document.getElementById('rxEntryMeal').focus();
+    showToast('សូមជ្រើសរើសមុន ឬក្រោយអាហារ', 'error');
+    return;
+  }
+  const dosage = schedule.reduce((sum, item) => sum + item.dose, 0);
+  const qty = dosage * days;
+  rxMedications.push({
+    name:medication.name,
+    dosage:String(dosage),
+    schedule,
+    days,
+    qty,
+    mealTiming,
+    instructions:medication.instructions || ''
+  });
   renderRxMedTable();
-  if(typeof saveRxDraft === 'function') saveRxDraft();
-
-  // Reset input វិញក្រោយបន្ថែមរួច
-  if(nameEl) nameEl.value = '';
-  if(dosageEl) dosageEl.value = '';
-  if(qtyEl) qtyEl.value = '1';
+  saveRxDraft();
 }
 
-function addMedication(){
-  const nameEl = document.getElementById('rxMedName');
-  const dosageEl = document.getElementById('rxMedDosage');
-  const qtyEl = document.getElementById('rxMedQty');
+function getRxSelectableSchedule(medication){
+  const savedSchedule = Array.isArray(medication.schedule)
+    ? medication.schedule.filter(item => item && item.period)
+    : [];
+  if(savedSchedule.length) return savedSchedule.map(item => ({
+    period:item.period,
+    dose:Math.max(1, parseInt(item.dose, 10) || 1),
+    time:item.time || ''
+  }));
+  const period = MEDICATION_PERIODS[0];
+  return [{
+    period:period.period,
+    dose:Math.max(1, getMedicationDailyDose(medication) || 1),
+    time:'08:00'
+  }];
+}
 
-  const name = nameEl ? nameEl.value.trim() : '';
-  const dosage = dosageEl ? dosageEl.value.trim() : '';
-  const qty = qtyEl ? (parseInt(qtyEl.value) || 1) : 1;
-  const days = 0; // កំណត់ 0 ដោយស្វ័យប្រវត្តិ (មិនបាច់មាន input days ទេ)
+function getRxPeriodLabel(period){
+  const knownPeriod = MEDICATION_PERIODS.find(item => item.period===period);
+  return knownPeriod ? (appLanguage==='km' ? knownPeriod.period : knownPeriod.english) : period;
+}
 
-  if(!name){ 
-    if(nameEl) nameEl.focus(); 
-    if(typeof showToast === 'function') showToast('សូមបញ្ចូលឈ្មោះថ្នាំ', 'error'); 
-    return; 
-  }       
+function getRxMealLabel(mealTiming, language=appLanguage){
+  if(mealTiming==='មុនអាហារ') return language==='km' ? 'មុនអាហារ' : 'Before meals';
+  if(mealTiming==='ក្រោយអាហារ') return language==='km' ? 'ក្រោយអាហារ' : 'After meals';
+  return mealTiming || '—';
+}
 
-  rxMedications.push({name, dosage, qty, days});
-  renderRxMedTable();
-  if(typeof saveRxDraft === 'function') saveRxDraft();
+function getRxEntrySchedule(medication){
+  const schedule = getRxSelectableSchedule(medication);
+  return schedule.flatMap((item, index) => {
+    const checkbox = document.getElementById(`rxTimeSlot${index}`);
+    if(!checkbox || !checkbox.checked) return [];
+    const doseControl = document.getElementById(`rxTimeDose${index}`);
+    return [{
+      ...item,
+      dose:Math.max(1, parseInt(doseControl ? doseControl.textContent : item.dose, 10) || 1)
+    }];
+  });
+}
 
-  // Reset input វិញក្រោយបន្ថែមរួច
-  if(nameEl) nameEl.value = '';
-  if(dosageEl) dosageEl.value = '';
-  if(qtyEl) qtyEl.value = '1';
+function updateRxEntryOptions(){
+  const medicationSelect = document.getElementById('rxEntryMedication');
+  const timeOptions = document.getElementById('rxEntryTimeOptions');
+  const mealSelect = document.getElementById('rxEntryMeal');
+  const daysSelect = document.getElementById('rxEntryDays');
+  const medication = presetMedications.find(item => item.id===medicationSelect.value);
+  if(!medication){
+    timeOptions.innerHTML = '<span class="text-muted">Select a medication first</span>';
+    updateRxEntryTimeSummary();
+    mealSelect.value = '';
+    daysSelect.value = '';
+    updateRxEntryQuantity();
+    return;
+  }
+  const schedule = getRxSelectableSchedule(medication);
+  timeOptions.innerHTML = schedule.map((item, index) =>
+    `<div class="rx-time-option">
+      <label class="rx-time-choice">
+        <input type="checkbox" id="rxTimeSlot${index}" checked onchange="updateRxEntryTimeSummary(); updateRxEntryQuantity()">
+        <span>${esc(getRxPeriodLabel(item.period))}${item.time ? ` (${esc(item.time)})` : ''}</span>
+      </label>
+      <div class="rx-dose-stepper">
+        <span class="rx-dose-unit" data-lang-km="គ្រាប់" data-lang-en="pills">គ្រាប់</span>
+        <button type="button" aria-label="${esc(appLanguage==='km' ? `បន្ថយចំនួនគ្រាប់ពេល ${getRxPeriodLabel(item.period)}` : `Decrease pill count for ${getRxPeriodLabel(item.period)}`)}" onclick="adjustRxEntryDose(${index}, -1)">−</button>
+        <span class="rx-dose-value" id="rxTimeDose${index}" aria-live="polite">${item.dose}</span>
+        <button type="button" aria-label="${esc(appLanguage==='km' ? `បន្ថែមចំនួនគ្រាប់ពេល ${getRxPeriodLabel(item.period)}` : `Increase pill count for ${getRxPeriodLabel(item.period)}`)}" onclick="adjustRxEntryDose(${index}, 1)">+</button>
+      </div>
+    </div>`
+    ).join('');
+  updateRxEntryTimeSummary();
+  mealSelect.value = medication.mealTiming || '';
+  daysSelect.value = medication.days ? String(medication.days) : '';
+  if(medication.days && !Array.from(daysSelect.options).some(option => option.value===String(medication.days))){
+    daysSelect.add(new Option(String(medication.days), String(medication.days)));
+    daysSelect.value = String(medication.days);
+  }
+  updateRxEntryQuantity();
+}
+
+function updateRxEntryTimeSummary(){
+  const summary = document.getElementById('rxEntryTimeSummary');
+  const options = document.querySelectorAll('#rxEntryTimeOptions .rx-time-choice input[type="checkbox"]:checked');
+  if(!summary) return;
+  const selectedTimes = Array.from(options).map(option => option.nextElementSibling.textContent.trim());
+  summary.textContent = selectedTimes.length ? selectedTimes.join(', ') : 'Select times';
+}
+
+function adjustRxEntryDose(index, change){
+  const dose = document.getElementById(`rxTimeDose${index}`);
+  if(!dose) return;
+  dose.textContent = String(Math.max(1, (parseInt(dose.textContent, 10) || 1) + change));
+  updateRxEntryQuantity();
+}
+
+function updateRxEntryQuantity(){
+  const medicationSelect = document.getElementById('rxEntryMedication');
+  const daysSelect = document.getElementById('rxEntryDays');
+  const quantity = document.getElementById('rxEntryQuantity');
+  if(!medicationSelect || !daysSelect || !quantity) return;
+  const medication = presetMedications.find(item => item.id===medicationSelect.value);
+  const days = Number(daysSelect.value);
+  const schedule = medication
+    ? getRxEntrySchedule(medication)
+    : [];
+  const dailyDose = schedule.reduce((sum, item) => sum + item.dose, 0);
+  quantity.textContent = dailyDose && Number.isInteger(days) && days > 0
+    ? String(dailyDose * days)
+    : '—';
 }
 
 function renderRxMedTable() {
   const tbody = document.getElementById('rxMedList');
   if (!tbody) return;
 
-  if (rxMedications.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">មិនទាន់មានថ្នាំបញ្ចូលនៅឡើយទេ</td></tr>`;
-    return;
-  }
-
-  // 💡 កែប្រែកន្លែងនេះ៖ ឱ្យត្រូវតាម ៥ ជួរឈរ (ល.រ, ឈ្មោះថ្នាំ, របៀបប្រើ, ចំនួន, ប៊ូតុងលុប)
-  tbody.innerHTML = rxMedications.map((med, index) => `
+  const medicationOptions = '<option value="">Select medication</option>' +
+    presetMedications.map(med => `<option value="${esc(med.id)}">${esc(med.name)}</option>`).join('');
+  const periodTimes = new Map(MEDICATION_PERIODS.map(period => [period.key, getRxPeriodTimeInfo(period)]));
+  const existingRows = rxMedications.map((med, index) => `
     <tr>
       <td class="text-center">${index + 1}</td>
-      <td><b>${med.name}</b></td>
-      <td>${med.dosage || '-'}</td>
-      <td class="text-center">${med.qty}</td>
+      <td><b>${esc(med.name)}</b></td>
+      ${MEDICATION_PERIODS.map(period => `<td class="rx-period-cell">${renderPrescriptionScheduleCell(med.schedule, period, periodTimes.get(period.key))}</td>`).join('')}
+      <td class="text-center">${med.days || '—'}</td>
+      <td class="rx-instructions-cell">
+        ${med.mealTiming ? `<div><span data-lang-km="${esc(getRxMealLabel(med.mealTiming, 'km'))}" data-lang-en="${esc(getRxMealLabel(med.mealTiming, 'en'))}">${esc(getRxMealLabel(med.mealTiming))}</span></div>` : ''}
+        ${med.instructions ? `<div>${esc(med.instructions)}</div>` : ''}
+        ${med.mealTiming || med.instructions ? '' : '—'}
+      </td>
       <td class="text-center">
         <button type="button" onclick="removeMedication(${index})" style="color:red; border:none; background:none; cursor:pointer;">❌</button>
       </td>
     </tr>
   `).join('');
+  updateRxPeriodHeaderTimes();
+  tbody.innerHTML = `
+    <tr class="rx-entry-row">
+      <td class="text-center">＋</td>
+      <td><select id="rxEntryMedication" onchange="updateRxEntryOptions()">${medicationOptions}</select></td>
+      <td colspan="4">
+        <details class="rx-time-picker">
+          <summary id="rxEntryTimeSummary">Select times</summary>
+          <div id="rxEntryTimeOptions" class="rx-time-options"><span class="text-muted">Select a medication first</span></div>
+        </details>
+      </td>
+      <td><select id="rxEntryDays" onchange="updateRxEntryQuantity()">
+        <option value="">Days</option>
+        ${Array.from({length:30}, (_, index) => `<option value="${index + 1}">${index + 1}</option>`).join('')}
+      </select></td>
+      <td><select id="rxEntryMeal" onchange="updateRxEntryQuantity()">
+        <option value="">Select</option>
+        <option value="មុនអាហារ">Before meals</option>
+        <option value="ក្រោយអាហារ">After meals</option>
+      </select><small class="rx-entry-total"><span id="rxEntryQuantity">—</span> <span data-lang-km="គ្រាប់សរុប" data-lang-en="tablets total">គ្រាប់សរុប</span></small></td>
+      <td class="text-center"><button type="button" class="rx-entry-add-btn" onclick="addMedication()" title="Add medication">＋</button></td>
+    </tr>` + (rxMedications.length ? existingRows : `
+    <tr class="rx-empty-row"><td colspan="9" class="text-center text-muted">No medications added yet</td></tr>
+  `);
 }
 function removeMedication(index) {
   rxMedications.splice(index, 1);
@@ -1529,23 +2007,6 @@ function removeMedication(index) {
   if(typeof saveRxDraft === 'function') saveRxDraft();
 }
 
-  const exists = presetMedications.some(m=>m.name===name);
-  if(!exists){
- 
-    
-    savePresetMedications();
-    renderMedOptions();
-    renderMedManageList();
-  }
-
-  
-
-
-function removeMedication(idx){
-  rxMedications.splice(idx,1);
-  renderRxMedTable();
-  saveRxDraft();
-}
 async function loadRxHistory(){
   const key = rxKey();
   const list = document.getElementById('rxHistoryList');
@@ -1564,7 +2025,14 @@ async function loadRxHistory(){
   }
   list.innerHTML = entries.slice().reverse().map(e=>{
     const meds = (e.items||[]).map(m=>
-      `<div class="presc-history-med">💊 ${esc(m.name)} ${m.dosage?('— '+esc(m.dosage)):''} ${m.qty?('(x'+esc(String(m.qty))+')'):''} ${m.days?(' · '+esc(String(m.days))+'ថ្ងៃ'):''}</div>`
+      `<div class="presc-history-med">💊 <b>${esc(m.name)}</b>
+        ${m.dosage ? `<div>${formatRxDailyDose(m.dosage)}</div>` : ''}
+        ${formatMedicationSchedule(m.schedule) ? `<div>${esc(formatMedicationSchedule(m.schedule))}</div>` : ''}
+        ${m.days ? `<div>រយៈពេល ${esc(String(m.days))} ថ្ងៃ</div>` : ''}
+        ${m.qty ? `<div>សរុប ${esc(String(m.qty))} គ្រាប់</div>` : ''}
+        ${m.mealTiming ? `<div>${esc(m.mealTiming)}</div>` : ''}
+        ${m.instructions ? `<div>${esc(m.instructions)}</div>` : ''}
+      </div>`
     ).join('');
     return `<div class="presc-history-item">
       <div class="presc-history-date">${esc(e.date)}</div>
@@ -1643,6 +2111,7 @@ window.addEventListener('afterprint', ()=>{
   await loadSettings();
   await loadDiscountPref();
   await loadPresetServices();
+  await loadPresetMedications();
   await loadInvoiceIndex();
   document.getElementById('invoiceNo').value = await peekInvoiceNo();
   applyHistoryFilters();
@@ -1819,6 +2288,39 @@ function filterInvoicePatients(){
   renderPatientSelectors();
   const doctor = document.getElementById('doctorName');
   renderPatientSearchResults('invoicePatientSearch','invoicePatientResults',patientsForDoctor(doctor ? doctor.value : ''),syncInvoicePatientSearch);
+}
+function toggleRxPatientSearch(){
+  const panel = document.getElementById('rxPatientSearchPanel');
+  const button = document.getElementById('rxPatientSearchToggle');
+  const search = document.getElementById('rxPatientSearch');
+  if(!panel || !button || !search) return;
+  panel.hidden = !panel.hidden;
+  button.setAttribute('aria-expanded', String(!panel.hidden));
+  if(panel.hidden){
+    document.getElementById('rxPatientSearchResults').hidden = true;
+    return;
+  }
+  search.value = '';
+  showRxPatients();
+  search.focus();
+}
+function showRxPatients(){
+  renderPatientSearchResults('rxPatientSearch','rxPatientSearchResults',patientsForDoctor(),selectRxPatient,true);
+}
+function filterRxPatients(){
+  renderPatientSearchResults('rxPatientSearch','rxPatientSearchResults',patientsForDoctor(),selectRxPatient);
+}
+function selectRxPatient(id){
+  syncInvoicePatientSearch(id);
+  const patient = dbPatients.find(item => item.id===id);
+  const search = document.getElementById('rxPatientSearch');
+  const panel = document.getElementById('rxPatientSearchPanel');
+  const button = document.getElementById('rxPatientSearchToggle');
+  if(search) search.value = patient ? patient.name || '' : '';
+  document.getElementById('rxPatientSearchResults').hidden = true;
+  if(panel) panel.hidden = true;
+  if(button) button.setAttribute('aria-expanded', 'false');
+  refreshPrescriptionView();
 }
 function syncInvoicePatientSearch(id){
   selectPatientForInvoice(id);
